@@ -1,0 +1,196 @@
+{% extends 'base.html' %}
+{% block title %}Book Storage - {{ warehouse.name }}{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+  <nav aria-label="breadcrumb"><ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="{% url 'warehouses:finder' %}">Find Warehouse</a></li>
+    <li class="breadcrumb-item"><a href="{% url 'warehouses:detail' warehouse.pk %}">{{ warehouse.name }}</a></li>
+    <li class="breadcrumb-item active">Book Storage</li>
+  </ol></nav>
+  <h4 class="mb-0" style="font-family:'Nunito',sans-serif;font-weight:800;">📋 Book Storage Space</h4>
+</div>
+
+<div class="row g-4">
+  <!-- Booking Form -->
+  <div class="col-md-7">
+    <form method="post" id="bookingForm">
+      {% csrf_token %}
+      {% if form.non_field_errors %}
+        <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+      {% endif %}
+
+      <div class="form-section">
+        <div class="form-section-title">Grain Details</div>
+        <div class="row g-3">
+          <div class="col-6">
+            <label class="form-label">Cereal Type *</label>
+            <select name="cereal_type" class="form-select {% if form.cereal_type.errors %}is-invalid{% endif %}">
+              {% for val, label in form.fields.cereal_type.choices %}
+                <option value="{{ val }}" {% if form.cereal_type.value == val %}selected{% endif %}>{{ label }}</option>
+              {% endfor %}
+            </select>
+            {% if form.cereal_type.errors %}<div class="invalid-feedback">{{ form.cereal_type.errors.0 }}</div>{% endif %}
+          </div>
+          <div class="col-6">
+            <label class="form-label">Number of Bags (90kg) *</label>
+            <input type="number" name="quantity_bags" id="quantity_bags"
+              class="form-control {% if form.quantity_bags.errors %}is-invalid{% endif %}"
+              min="1" max="{{ warehouse.available_bags }}"
+              value="{{ form.quantity_bags.value|default:'' }}"
+              placeholder="e.g. 50">
+            <div class="form-text">Max: {{ warehouse.available_bags }} bags ({{ warehouse.available_capacity_mt }} MT free)</div>
+            {% if form.quantity_bags.errors %}<div class="invalid-feedback">{{ form.quantity_bags.errors.0 }}</div>{% endif %}
+          </div>
+        </div>
+        <div class="mt-2 p-2 rounded" id="weightInfo" style="background:#f8f9fa;font-size:.83rem;display:none;">
+          <i class="bi bi-info-circle me-1 text-success"></i>
+          Equivalent to <strong id="mt_display">0</strong> metric tonnes
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div class="form-section-title">Storage Period</div>
+        <div class="row g-3">
+          <div class="col-6">
+            <label class="form-label">Start Date *</label>
+            <input type="date" name="storage_start_date"
+              class="form-control {% if form.storage_start_date.errors %}is-invalid{% endif %}"
+              value="{{ form.storage_start_date.value|default:'' }}" id="startDate">
+            {% if form.storage_start_date.errors %}<div class="invalid-feedback">{{ form.storage_start_date.errors.0 }}</div>{% endif %}
+          </div>
+          <div class="col-6">
+            <label class="form-label">End Date *</label>
+            <input type="date" name="storage_end_date"
+              class="form-control {% if form.storage_end_date.errors %}is-invalid{% endif %}"
+              value="{{ form.storage_end_date.value|default:'' }}" id="endDate">
+            {% if form.storage_end_date.errors %}<div class="invalid-feedback">{{ form.storage_end_date.errors.0 }}</div>{% endif %}
+          </div>
+        </div>
+        <div class="mt-2 p-2 rounded" id="durationInfo" style="background:#f8f9fa;font-size:.83rem;display:none;">
+          <i class="bi bi-calendar me-1 text-success"></i>
+          Storage duration: <strong id="duration_display"></strong>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div class="form-section-title">Additional Notes</div>
+        <textarea name="farmer_notes" class="form-control" rows="3"
+          placeholder="Any special requirements or notes (optional)...">{{ form.farmer_notes.value|default:'' }}</textarea>
+      </div>
+
+      <!-- Fee Preview -->
+      <div class="p-3 mb-3 rounded" id="feePreview" style="background:#d4edda;display:none;">
+        <div style="font-weight:700;color:#155724;font-size:.95rem;">Estimated Storage Fee</div>
+        <div style="font-size:1.3rem;font-weight:800;color:#1e7e34;">KES <span id="fee_display">0</span></div>
+        <div style="font-size:.75rem;color:#6c757d;">Rate: KES {{ warehouse.storage_fee_per_bag_month }}/bag/month</div>
+      </div>
+
+      <button type="submit" class="btn btn-green w-100 py-2" style="font-weight:700;font-size:1rem;border-radius:10px;">
+        <i class="bi bi-send me-2"></i>Submit Booking Request
+      </button>
+    </form>
+  </div>
+
+  <!-- Warehouse Summary -->
+  <div class="col-md-5">
+    <div class="card" style="position:sticky;top:80px;">
+      <div class="card-body">
+        <h6 style="font-weight:700;color:#1e7e34;"><i class="bi bi-building me-2"></i>{{ warehouse.name }}</h6>
+        <div class="text-muted mb-3" style="font-size:.85rem;">
+          <i class="bi bi-geo-alt me-1"></i>{{ warehouse.sub_county }}, {{ warehouse.county }}
+        </div>
+
+        <div class="row g-2 text-center mb-3">
+          <div class="col-6">
+            <div style="background:#d4edda;border-radius:8px;padding:.5rem;">
+              <div style="font-size:1.1rem;font-weight:800;color:#1e7e34;">{{ warehouse.available_capacity_mt }}</div>
+              <div style="font-size:.72rem;color:#6c757d;">MT Available</div>
+            </div>
+          </div>
+          <div class="col-6">
+            <div style="background:#fff3cd;border-radius:8px;padding:.5rem;">
+              <div style="font-size:1.1rem;font-weight:800;color:#856404;">{{ warehouse.available_bags }}</div>
+              <div style="font-size:.72rem;color:#6c757d;">Bags Available</div>
+            </div>
+          </div>
+        </div>
+
+        <div style="font-size:.82rem;" class="mb-2">
+          <div class="d-flex justify-content-between py-1 border-bottom">
+            <span class="text-muted">Storage Type</span>
+            <span class="fw-semibold">{{ warehouse.get_storage_type_display }}</span>
+          </div>
+          <div class="d-flex justify-content-between py-1 border-bottom">
+            <span class="text-muted">Certification</span>
+            <span class="fw-semibold">{{ warehouse.get_certification_status_display }}</span>
+          </div>
+          <div class="d-flex justify-content-between py-1 border-bottom">
+            <span class="text-muted">Rate</span>
+            <span class="fw-semibold">KES {{ warehouse.storage_fee_per_bag_month }}/bag/mo</span>
+          </div>
+          <div class="d-flex justify-content-between py-1 border-bottom">
+            <span class="text-muted">Contact</span>
+            <span class="fw-semibold">{{ warehouse.contact_phone }}</span>
+          </div>
+          <div class="d-flex justify-content-between py-1">
+            <span class="text-muted">WRS Accepted</span>
+            <span class="fw-semibold text-success">{% if warehouse.accepts_wrs %}Yes ✓{% else %}No{% endif %}</span>
+          </div>
+        </div>
+
+        {% if warehouse.has_pest_control or warehouse.has_moisture_control or warehouse.has_security %}
+        <div class="mt-2" style="font-size:.78rem;">
+          {% if warehouse.has_pest_control %}<span class="badge me-1" style="background:#d4edda;color:#155724;">✓ Pest Control</span>{% endif %}
+          {% if warehouse.has_moisture_control %}<span class="badge me-1" style="background:#d4edda;color:#155724;">✓ Moisture Control</span>{% endif %}
+          {% if warehouse.has_security %}<span class="badge me-1" style="background:#d4edda;color:#155724;">✓ Security</span>{% endif %}
+          {% if warehouse.has_fumigation %}<span class="badge me-1" style="background:#d4edda;color:#155724;">✓ Fumigation</span>{% endif %}
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const rate = {{ warehouse.storage_fee_per_bag_month }};
+
+function updateCalculations() {
+  const bags = parseInt(document.getElementById('quantity_bags').value) || 0;
+  const start = document.getElementById('startDate').value;
+  const end = document.getElementById('endDate').value;
+  
+  // Weight display
+  if (bags > 0) {
+    const mt = (bags * 90 / 1000).toFixed(3);
+    document.getElementById('mt_display').textContent = mt;
+    document.getElementById('weightInfo').style.display = 'block';
+  } else {
+    document.getElementById('weightInfo').style.display = 'none';
+  }
+  
+  // Duration and fee
+  if (start && end && bags > 0) {
+    const days = (new Date(end) - new Date(start)) / (1000 * 60 * 60 * 24);
+    if (days > 0) {
+      const months = Math.max(1, days / 30);
+      const fee = (bags * rate * months).toFixed(2);
+      document.getElementById('duration_display').textContent = days + ' days (~' + months.toFixed(1) + ' months)';
+      document.getElementById('fee_display').textContent = parseFloat(fee).toLocaleString();
+      document.getElementById('durationInfo').style.display = 'block';
+      document.getElementById('feePreview').style.display = 'block';
+    }
+  }
+}
+
+document.getElementById('quantity_bags').addEventListener('input', updateCalculations);
+document.getElementById('startDate').addEventListener('change', updateCalculations);
+document.getElementById('endDate').addEventListener('change', updateCalculations);
+
+// Set min date to today
+document.getElementById('startDate').min = new Date().toISOString().split('T')[0];
+document.getElementById('endDate').min = new Date().toISOString().split('T')[0];
+</script>
+{% endblock %}

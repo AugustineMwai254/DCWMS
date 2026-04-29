@@ -1,0 +1,249 @@
+{% extends 'base.html' %}
+{% block title %}Withdrawal {{ withdrawal.withdrawal_ref_short }}{% endblock %}
+{% block content %}
+<div class="mb-4">
+  <nav aria-label="breadcrumb"><ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="{% url 'withdrawals:list' %}">Withdrawals</a></li>
+    <li class="breadcrumb-item active">{{ withdrawal.withdrawal_ref_short }}</li>
+  </ol></nav>
+  <div class="d-flex justify-content-between align-items-center">
+    <h4 class="mb-0" style="font-family:'Nunito',sans-serif;font-weight:800;">Withdrawal {{ withdrawal.withdrawal_ref_short }}</h4>
+    <span class="badge badge-{{ withdrawal.status }} rounded-pill px-3 py-2">{{ withdrawal.get_status_display }}</span>
+  </div>
+</div>
+<div class="row g-4">
+  <div class="col-md-7">
+    <div class="card mb-4">
+      <div class="card-header"><i class="bi bi-info-circle me-2"></i>Withdrawal Details</div>
+      <div class="card-body" style="font-size:.9rem;">
+        <div class="d-flex justify-content-between py-2 border-bottom"><span class="text-muted">Farmer</span><span class="fw-semibold">{{ withdrawal.farmer.get_full_name }} &bull; {{ withdrawal.farmer.phone_number }}</span></div>
+        <div class="d-flex justify-content-between py-2 border-bottom"><span class="text-muted">Warehouse</span><span class="fw-semibold">{{ withdrawal.warehouse.name }}, {{ withdrawal.warehouse.county }}</span></div>
+        <div class="d-flex justify-content-between py-2 border-bottom"><span class="text-muted">Cereal Type</span><span class="fw-semibold text-capitalize">{{ withdrawal.inventory_record.cereal_type }}</span></div>
+        <div class="d-flex justify-content-between py-2 border-bottom"><span class="text-muted">Bags to Withdraw</span><span class="fw-bold" style="color:#1e7e34;font-size:1.1rem;">{{ withdrawal.bags_to_withdraw }} bags ({{ withdrawal.mt_to_withdraw }} MT)</span></div>
+        <div class="d-flex justify-content-between py-2 border-bottom"><span class="text-muted">Scheduled Date</span><span class="fw-semibold">{{ withdrawal.scheduled_date|date:"d M Y" }}</span></div>
+        {% if withdrawal.actual_withdrawal_date %}<div class="d-flex justify-content-between py-2 border-bottom"><span class="text-muted">Actual Date</span><span class="fw-semibold">{{ withdrawal.actual_withdrawal_date|date:"d M Y" }}</span></div>{% endif %}
+        <div class="d-flex justify-content-between py-2"><span class="text-muted">Submitted</span><span class="fw-semibold">{{ withdrawal.created_at|date:"d M Y, H:i" }}</span></div>
+        {% if withdrawal.farmer_notes %}<div class="mt-2 p-2" style="background:#f8f9fa;border-radius:8px;"><div class="text-muted mb-1" style="font-size:.75rem;">FARMER NOTES</div>{{ withdrawal.farmer_notes }}</div>{% endif %}
+        {% if withdrawal.operator_notes %}<div class="mt-2 p-2" style="background:#fff3cd;border-radius:8px;"><div class="text-muted mb-1" style="font-size:.75rem;">OPERATOR NOTES</div>{{ withdrawal.operator_notes }}</div>{% endif %}
+        {% if withdrawal.rejection_reason %}<div class="mt-2 p-2" style="background:#f8d7da;border-radius:8px;"><div class="text-muted mb-1" style="font-size:.75rem;">REJECTION REASON</div>{{ withdrawal.rejection_reason }}</div>{% endif %}
+      </div>
+    </div>
+
+    <!-- Operator Actions -->
+    {% if user.is_operator %}
+      {% if withdrawal.status == 'scheduled' %}
+      <div class="card border-primary mb-3" id="operatorActionsCard">
+        <div class="card-header bg-primary text-white"><i class="bi bi-hand-thumbs-up me-2"></i>Accept Withdrawal</div>
+        <div class="card-body">
+          <p style="font-size:.85rem;margin-bottom:1rem;">Review the withdrawal request and accept or reject it.</p>
+          <form id="acceptForm">
+            {% csrf_token %}
+            <div class="mb-3">
+              <label class="form-label">Operator Notes</label>
+              <textarea name="operator_notes" class="form-control" rows="2" placeholder="Optional notes..."></textarea>
+            </div>
+            <div class="d-flex gap-2">
+              <button type="button" class="btn btn-success flex-grow-1" onclick="acceptWithdrawal({{ withdrawal.pk }})">
+                <i class="bi bi-check me-1"></i>Accept
+              </button>
+              <button type="button" class="btn btn-danger flex-grow-1" data-bs-toggle="collapse" data-bs-target="#rejectWd">
+                <i class="bi bi-x me-1"></i>Reject
+              </button>
+            </div>
+            <div class="collapse mt-2" id="rejectWd">
+              <textarea name="rejection_reason" class="form-control mb-2" rows="2" placeholder="Rejection reason *"></textarea>
+              <button type="button" class="btn btn-danger w-100" onclick="rejectWithdrawal({{ withdrawal.pk }})">Confirm Reject</button>
+            </div>
+          </form>
+        </div>
+      </div>
+      
+      {% elif withdrawal.status == 'accepted' %}
+      <div class="card border-info mb-3" id="operatorActionsCard">
+        <div class="card-header bg-info text-white"><i class="bi bi-hand-thumbs-up me-2"></i>Approve Withdrawal</div>
+        <div class="card-body">
+          <p style="font-size:.85rem;margin-bottom:1rem;">Approve this withdrawal to proceed with the process.</p>
+          <form id="approveForm">
+            {% csrf_token %}
+            <button type="button" class="btn btn-info w-100" onclick="approveWithdrawal({{ withdrawal.pk }})">
+              <i class="bi bi-check-all me-1"></i>Approve
+            </button>
+          </form>
+        </div>
+      </div>
+      
+      {% elif withdrawal.status == 'approved' %}
+      <div class="card border-success mb-3" id="operatorActionsCard">
+        <div class="card-header" style="background:#d4edda;color:#155724;"><i class="bi bi-check-circle me-2"></i>Mark as Completed</div>
+        <div class="card-body">
+          <p style="font-size:.85rem;">Click below when the farmer has physically collected their grain. This will update inventory and restore warehouse capacity.</p>
+          <form id="completeForm">
+            {% csrf_token %}
+            <div class="mb-2">
+              <textarea name="operator_notes" class="form-control" rows="2" placeholder="Completion notes (optional)..."></textarea>
+            </div>
+            <button type="button" class="btn btn-success w-100" onclick="completeWithdrawal({{ withdrawal.pk }})">
+              <i class="bi bi-check2-all me-2"></i>Mark Withdrawal Complete
+            </button>
+          </form>
+        </div>
+      </div>
+      {% endif %}
+    {% endif %}
+  </div>
+  
+  <div class="col-md-5">
+    <div class="card mb-3">
+      <div class="card-body">
+        <h6 class="fw-bold"><i class="bi bi-box-seam me-2"></i>Current Inventory</h6>
+        <div style="font-size:.88rem;" id="inventoryInfo">
+          <div class="d-flex justify-content-between py-2 border-bottom"><span class="text-muted">Original</span><span class="fw-semibold">{{ withdrawal.inventory_record.quantity_bags }} bags</span></div>
+          <div class="d-flex justify-content-between py-2 border-bottom"><span class="text-muted">Remaining</span><span class="fw-bold" style="color:#1e7e34;" id="remainingBags">{{ withdrawal.inventory_record.remaining_bags }} bags</span></div>
+          <div class="d-flex justify-content-between py-2"><span class="text-muted">This Request</span><span class="fw-bold" style="color:#f0a500;">{{ withdrawal.bags_to_withdraw }} bags</span></div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="card" id="warehouseCapacityCard">
+      <div class="card-body">
+        <h6 class="fw-bold"><i class="bi bi-building me-2"></i>Warehouse Capacity</h6>
+        <div style="font-size:.88rem;">
+          <div class="d-flex justify-content-between py-2 border-bottom"><span class="text-muted">Total Capacity</span><span class="fw-semibold">{{ withdrawal.warehouse.total_capacity_mt }} MT</span></div>
+          <div class="d-flex justify-content-between py-2"><span class="text-muted">Available Now</span><span class="fw-bold" style="color:#1e7e34;" id="availableCapacity">{{ withdrawal.warehouse.available_capacity_mt }} MT</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function acceptWithdrawal(withdrawalId) {
+    const notes = document.querySelector('#acceptForm textarea[name="operator_notes"]').value;
+    const formData = new FormData();
+    formData.append('operator_notes', notes);
+    
+    fetch(`/withdrawals/ajax/${withdrawalId}/accept/`, {
+        method: 'POST',
+        headers: {'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value},
+        body: formData
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.status === 'success') {
+            showAlert('success', data.message);
+            setTimeout(() => location.reload(), 1500);
+        } else {
+            showAlert('error', data.message);
+        }
+    })
+    .catch(e => showAlert('error', e.message));
+}
+
+function approveWithdrawal(withdrawalId) {
+    if (!confirm('Approve this withdrawal?')) return;
+    
+    const formData = new FormData();
+    
+    fetch(`/withdrawals/ajax/${withdrawalId}/approve/`, {
+        method: 'POST',
+        headers: {'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value},
+        body: formData
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.status === 'success') {
+            showAlert('success', data.message);
+            setTimeout(() => location.reload(), 1500);
+        } else {
+            showAlert('error', data.message);
+        }
+    })
+    .catch(e => showAlert('error', e.message));
+}
+
+function completeWithdrawal(withdrawalId) {
+    if (!confirm('Complete withdrawal? Inventory will be updated and warehouse capacity restored.')) return;
+    
+    const notes = document.querySelector('#completeForm textarea[name="operator_notes"]')?.value || '';
+    const formData = new FormData();
+    formData.append('operator_notes', notes);
+    
+    fetch(`/withdrawals/ajax/${withdrawalId}/complete/`, {
+        method: 'POST',
+        headers: {'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value},
+        body: formData
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.status === 'success') {
+            showAlert('success', data.message);
+            // Update inventory display
+            if (data.inventory_update) {
+                document.getElementById('remainingBags').textContent = data.inventory_update.remaining_bags + ' bags';
+            }
+            if (data.warehouse_update) {
+                document.getElementById('availableCapacity').textContent = data.warehouse_update.available_capacity_mt + ' MT';
+            }
+            // Hide action card
+            document.getElementById('operatorActionsCard').style.display = 'none';
+            // Update status badge
+            location.reload();
+        } else {
+            showAlert('error', data.message);
+        }
+    })
+    .catch(e => showAlert('error', e.message));
+}
+
+function rejectWithdrawal(withdrawalId) {
+    const reason = document.querySelector('textarea[name="rejection_reason"]').value;
+    if (!reason) {
+        showAlert('error', 'Rejection reason is required');
+        return;
+    }
+    
+    const notes = document.querySelector('#acceptForm textarea[name="operator_notes"]').value;
+    const formData = new FormData();
+    formData.append('rejection_reason', reason);
+    formData.append('operator_notes', notes);
+    
+    fetch(`/withdrawals/ajax/${withdrawalId}/reject/`, {
+        method: 'POST',
+        headers: {'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value},
+        body: formData
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.status === 'success') {
+            showAlert('success', data.message);
+            setTimeout(() => location.reload(), 1500);
+        } else {
+            showAlert('error', data.message);
+        }
+    })
+    .catch(e => showAlert('error', e.message));
+}
+
+function showAlert(type, message) {
+    const alertClass = type === 'success' ? 'alert-success' : 'alert-danger';
+    const alertHtml = `<div class="alert ${alertClass} alert-dismissible fade show" role="alert">
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>`;
+    
+    const container = document.querySelector('.row.g-4');
+    const alertDiv = document.createElement('div');
+    alertDiv.innerHTML = alertHtml;
+    container.insertBefore(alertDiv, container.firstChild);
+}
+</script>
+
+<style>
+.badge-scheduled { background-color: #6c757d; }
+.badge-accepted { background-color: #0dcaf0; }
+.badge-approved { background-color: #0d6efd; }
+.badge-completed { background-color: #198754; }
+.badge-rejected { background-color: #dc3545; }
+.badge-cancelled { background-color: #6c757d; }
+</style>
+{% endblock %}

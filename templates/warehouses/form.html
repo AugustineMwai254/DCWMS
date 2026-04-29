@@ -1,0 +1,134 @@
+{% extends 'base.html' %}
+{% block title %}{{ action }} Warehouse{% endblock %}
+{% block content %}
+<div class="mb-4">
+  <h4 style="font-family:'Nunito',sans-serif;font-weight:800;"><i class="bi bi-building me-2"></i>{{ action }} Warehouse</h4>
+</div>
+<form method="post">
+  {% csrf_token %}
+  {% if form.non_field_errors %}<div class="alert alert-danger">{{ form.non_field_errors }}</div>{% endif %}
+
+  <div class="form-section">
+    <div class="form-section-title">Warehouse Information</div>
+    <div class="row g-3">
+      <div class="col-md-8">
+        <label class="form-label">Warehouse Name *</label>
+        <input type="text" name="name" class="form-control {% if form.name.errors %}is-invalid{% endif %}" value="{{ form.name.value|default:'' }}" required>
+        {% if form.name.errors %}<div class="invalid-feedback">{{ form.name.errors.0 }}</div>{% endif %}
+      </div>
+      <div class="col-md-4">
+        <label class="form-label">Contact Phone *</label>
+        <input type="text" name="contact_phone" class="form-control {% if form.contact_phone.errors %}is-invalid{% endif %}" value="{{ form.contact_phone.value|default:'' }}" required>
+        {% if form.contact_phone.errors %}<div class="invalid-feedback">{{ form.contact_phone.errors.0 }}</div>{% endif %}
+      </div>
+      <div class="col-md-6">
+        <label class="form-label">Contact Email</label>
+        <input type="email" name="contact_email" class="form-control" value="{{ form.contact_email.value|default:'' }}">
+      </div>
+      <div class="col-md-6">
+        <label class="form-label">Physical Address *</label>
+        <textarea name="physical_address" class="form-control" rows="2">{{ form.physical_address.value|default:'' }}</textarea>
+      </div>
+    </div>
+  </div>
+
+  <div class="form-section">
+    <div class="form-section-title">Location</div>
+    <div class="row g-3">
+      <div class="col-md-4">
+        <label class="form-label">County *</label>
+        {{ form.county }}
+        {% if form.county.errors %}<div class="invalid-feedback">{{ form.county.errors.0 }}</div>{% endif %}
+      </div>
+      <div class="col-md-4">
+        <label class="form-label">Sub-County *</label>
+        <input type="text" name="sub_county" class="form-control {% if form.sub_county.errors %}is-invalid{% endif %}" value="{{ form.sub_county.value|default:'' }}" required>
+        {% if form.sub_county.errors %}<div class="invalid-feedback">{{ form.sub_county.errors.0 }}</div>{% endif %}
+      </div>
+      <div class="col-md-4">
+        <label class="form-label">Village</label>
+        <input type="text" name="village" class="form-control" value="{{ form.village.value|default:'' }}">
+      </div>
+    </div>
+  </div>
+
+  <div class="form-section">
+    <div class="form-section-title">Capacity & Storage</div>
+    <div class="row g-3">
+      <div class="col-md-4">
+        <label class="form-label">Total Capacity (Metric Tonnes) *</label>
+        <input type="number" name="total_capacity_mt" step="0.01" min="0.01"
+          class="form-control {% if form.total_capacity_mt.errors %}is-invalid{% endif %}"
+          value="{{ form.total_capacity_mt.value|default:'' }}" required>
+        {% if form.total_capacity_mt.errors %}<div class="invalid-feedback">{{ form.total_capacity_mt.errors.0 }}</div>{% endif %}
+      </div>
+      <div class="col-md-4">
+        <label class="form-label">Storage Type *</label>
+        <select name="storage_type" class="form-select">{{ form.storage_type }}</select>
+      </div>
+      <div class="col-md-4">
+        <label class="form-label">Rate (KES/bag/month) *</label>
+        <input type="number" name="storage_fee_per_bag_month" step="0.01" min="0"
+          class="form-control" value="{{ form.storage_fee_per_bag_month.value|default:'50' }}" required>
+      </div>
+    </div>
+  </div>
+
+  <div class="form-section">
+    <div class="form-section-title">Certification</div>
+    <div class="row g-3">
+      <div class="col-md-6">
+        <label class="form-label">Certification Status *</label>
+        <select name="certification_status" class="form-select">{{ form.certification_status }}</select>
+      </div>
+      <div class="col-md-6">
+        <label class="form-label">Certification Expiry</label>
+        <input type="date" name="certification_expiry" class="form-control" value="{{ form.certification_expiry.value|default:'' }}">
+      </div>
+    </div>
+  </div>
+
+  <div class="form-section">
+    <div class="form-section-title">Facilities & Features</div>
+    <div class="row g-3">
+      <div class="col-6 col-md-3">
+        <div class="form-check">
+          <input class="form-check-input" type="checkbox" name="has_pest_control" id="pest" {% if form.has_pest_control.value %}checked{% endif %}>
+          <label class="form-check-label" for="pest">Pest Control</label>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="form-check">
+          <input class="form-check-input" type="checkbox" name="has_moisture_control" id="moisture" {% if form.has_moisture_control.value %}checked{% endif %}>
+          <label class="form-check-label" for="moisture">Moisture Control</label>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="form-check">
+          <input class="form-check-input" type="checkbox" name="has_security" id="security" {% if form.has_security.value %}checked{% endif %}>
+          <label class="form-check-label" for="security">Security</label>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="form-check">
+          <input class="form-check-input" type="checkbox" name="has_fumigation" id="fumig" {% if form.has_fumigation.value %}checked{% endif %}>
+          <label class="form-check-label" for="fumig">Fumigation</label>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="form-check">
+          <input class="form-check-input" type="checkbox" name="accepts_wrs" id="wrs" {% if form.accepts_wrs.value %}checked{% endif %}>
+          <label class="form-check-label" for="wrs">Accept WRS Receipts</label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="d-flex gap-2">
+    <button type="submit" class="btn btn-green px-4 py-2" style="font-weight:700;">
+      <i class="bi bi-save me-2"></i>{{ action }} Warehouse
+    </button>
+    <a href="{% url 'warehouses:my_warehouses' %}" class="btn btn-outline-secondary">Cancel</a>
+  </div>
+</form>
+{% endblock %}

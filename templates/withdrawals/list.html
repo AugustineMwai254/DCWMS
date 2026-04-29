@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+{% block title %}Withdrawals{% endblock %}
+{% block content %}
+<h4 class="mb-4" style="font-family:'Nunito',sans-serif;font-weight:800;"><i class="bi bi-arrow-down-circle me-2"></i>Withdrawal Requests</h4>
+<div class="card mb-3">
+  <div class="card-body py-2">
+    <div class="d-flex gap-2 flex-wrap">
+      <a href="?" class="btn btn-sm {% if not status_filter %}btn-green{% else %}btn-outline-secondary{% endif %}">All</a>
+      {% for val,label in STATUS_CHOICES %}
+        <a href="?status={{ val }}" class="btn btn-sm {% if status_filter == val %}btn-green{% else %}btn-outline-secondary{% endif %}">{{ label }}</a>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+<div class="card">
+  <div class="card-body p-0">
+    {% if withdrawals %}
+    <div class="table-responsive">
+      <table class="table mb-0">
+        <thead><tr><th>Reference</th><th>Farmer</th><th>Warehouse</th><th>Bags</th><th>Scheduled</th><th>Status</th><th></th></tr></thead>
+        <tbody>
+          {% for w in withdrawals %}
+          <tr>
+            <td><code style="font-size:.82rem;">{{ w.withdrawal_ref_short }}</code></td>
+            <td style="font-size:.88rem;">{{ w.farmer.get_full_name }}</td>
+            <td style="font-size:.88rem;">{{ w.warehouse.name }}</td>
+            <td style="font-size:.88rem;">{{ w.bags_to_withdraw }}</td>
+            <td style="font-size:.83rem;">{{ w.scheduled_date|date:"d M Y" }}</td>
+            <td><span class="badge badge-{{ w.status }} rounded-pill">{{ w.get_status_display }}</span></td>
+            <td><a href="{% url 'withdrawals:detail' w.pk %}" class="btn btn-sm btn-outline-secondary">
+              {% if user.is_operator and w.status == 'pending' %}Process{% else %}View{% endif %}
+            </a></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+      <div class="text-center py-5 text-muted">
+        <i class="bi bi-truck" style="font-size:2.5rem;display:block;margin-bottom:.5rem;"></i>
+        No withdrawal requests yet.
+      </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

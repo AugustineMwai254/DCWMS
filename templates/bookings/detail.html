@@ -1,0 +1,191 @@
+{% extends 'base.html' %}
+{% block title %}Booking {{ booking.booking_ref_human }}{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+  <nav aria-label="breadcrumb"><ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="{% url 'bookings:list' %}">Bookings</a></li>
+    <li class="breadcrumb-item active">{{ booking.booking_ref_human }}</li>
+  </ol></nav>
+  <div class="d-flex justify-content-between align-items-center">
+    <h4 class="mb-0" style="font-family:'Nunito',sans-serif;font-weight:800;">
+      Booking {{ booking.booking_ref_human }}
+    </h4>
+    <span class="badge badge-{{ booking.status }} rounded-pill px-3 py-2" style="font-size:.85rem;">
+      {{ booking.get_status_display }}
+    </span>
+  </div>
+</div>
+
+<div class="row g-4">
+  <div class="col-md-8">
+    <!-- Booking Details -->
+    <div class="card mb-4">
+      <div class="card-header"><i class="bi bi-info-circle me-2"></i>Booking Details</div>
+      <div class="card-body">
+        <div class="row g-3" style="font-size:.9rem;">
+          <div class="col-6">
+            <div class="text-muted mb-1" style="font-size:.75rem;">REFERENCE</div>
+            <code style="font-size:1rem;background:#f8f9fa;padding:.3rem .6rem;border-radius:6px;">{{ booking.booking_ref_human }}</code>
+          </div>
+          <div class="col-6">
+            <div class="text-muted mb-1" style="font-size:.75rem;">SUBMITTED</div>
+            <div class="fw-semibold">{{ booking.created_at|date:"d M Y, H:i" }}</div>
+          </div>
+          <div class="col-6">
+            <div class="text-muted mb-1" style="font-size:.75rem;">FARMER</div>
+            <div class="fw-semibold">{{ booking.farmer.get_full_name }}</div>
+            <div style="font-size:.8rem;color:#6c757d;">{{ booking.farmer.phone_number }} &bull; {{ booking.farmer.county }}</div>
+          </div>
+          <div class="col-6">
+            <div class="text-muted mb-1" style="font-size:.75rem;">WAREHOUSE</div>
+            <div class="fw-semibold">{{ booking.warehouse.name }}</div>
+            <div style="font-size:.8rem;color:#6c757d;">{{ booking.warehouse.sub_county }}, {{ booking.warehouse.county }}</div>
+          </div>
+          <div class="col-4">
+            <div class="text-muted mb-1" style="font-size:.75rem;">CEREAL TYPE</div>
+            <div class="fw-semibold text-capitalize">{{ booking.cereal_type }}</div>
+          </div>
+          <div class="col-4">
+            <div class="text-muted mb-1" style="font-size:.75rem;">QUANTITY</div>
+            <div class="fw-semibold">{{ booking.quantity_bags }} bags</div>
+            <div style="font-size:.8rem;color:#6c757d;">{{ booking.quantity_mt }} MT</div>
+          </div>
+          <div class="col-4">
+            <div class="text-muted mb-1" style="font-size:.75rem;">ESTIMATED FEE</div>
+            <div class="fw-semibold text-success">KES {{ booking.total_fee_kes|floatformat:2 }}</div>
+          </div>
+          <div class="col-6">
+            <div class="text-muted mb-1" style="font-size:.75rem;">STORAGE START</div>
+            <div class="fw-semibold">{{ booking.storage_start_date|date:"d M Y" }}</div>
+          </div>
+          <div class="col-6">
+            <div class="text-muted mb-1" style="font-size:.75rem;">STORAGE END</div>
+            <div class="fw-semibold">{{ booking.storage_end_date|date:"d M Y" }}</div>
+          </div>
+        </div>
+        {% if booking.farmer_notes %}
+        <div class="mt-3 p-3" style="background:#f8f9fa;border-radius:8px;">
+          <div class="text-muted mb-1" style="font-size:.75rem;">FARMER NOTES</div>
+          <div style="font-size:.9rem;">{{ booking.farmer_notes }}</div>
+        </div>
+        {% endif %}
+        {% if booking.operator_notes %}
+        <div class="mt-2 p-3" style="background:#fff3cd;border-radius:8px;">
+          <div class="text-muted mb-1" style="font-size:.75rem;">OPERATOR NOTES</div>
+          <div style="font-size:.9rem;">{{ booking.operator_notes }}</div>
+        </div>
+        {% endif %}
+        {% if booking.rejection_reason %}
+        <div class="mt-2 p-3" style="background:#f8d7da;border-radius:8px;">
+          <div class="text-muted mb-1" style="font-size:.75rem;">REJECTION REASON</div>
+          <div style="font-size:.9rem;">{{ booking.rejection_reason }}</div>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+    {% if payment %}
+    <div class="card border-success mb-4">
+      <div class="card-header bg-success text-white"><i class="bi bi-credit-card-2-front me-2"></i>Payment Summary</div>
+      <div class="card-body">
+        <div class="row g-3" style="font-size:.9rem;">
+          <div class="col-6">
+            <div class="text-muted mb-1" style="font-size:.75rem;">PAYMENT STATUS</div>
+            <div class="fw-semibold">{{ payment.get_status_display }}</div>
+          </div>
+          <div class="col-6">
+            <div class="text-muted mb-1" style="font-size:.75rem;">AMOUNT</div>
+            <div class="fw-semibold text-success">KES {{ payment.amount_kes|floatformat:2 }}</div>
+          </div>
+          <div class="col-6">
+            <div class="text-muted mb-1" style="font-size:.75rem;">TRACKING CODE</div>
+            <div class="fw-semibold">{{ payment.tracking_code }}</div>
+          </div>
+          <div class="col-6">
+            <div class="text-muted mb-1" style="font-size:.75rem;">MPESA RECEIPT</div>
+            <div class="fw-semibold">{{ payment.mpesa_receipt_number|default:'N/A' }}</div>
+          </div>
+          <div class="col-6">
+            <div class="text-muted mb-1" style="font-size:.75rem;">COMPLETED AT</div>
+            <div class="fw-semibold">{% if payment.completed_at %}{{ payment.completed_at|date:'d M Y, H:i' }}{% else %}Pending{% endif %}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+    <!-- Payment Panel -->
+    {% if user.is_farmer and booking.status == 'pending_payment' %}
+    <div class="card border-info">
+      <div class="card-header bg-info text-white"><i class="bi bi-credit-card me-2"></i>Complete Payment</div>
+      <div class="card-body text-center">
+        <p class="mb-3">Your booking requires payment to be confirmed. Complete the payment to secure your warehouse space.</p>
+        <a href="{% url 'payments:initiate' booking.pk %}" class="btn btn-success btn-lg">
+          <i class="bi bi-mobile me-2"></i>Pay with MPesa - KES {{ booking.total_fee_kes|floatformat:2 }}
+        </a>
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- Farmer Cancel -->
+    {% if user.is_farmer and booking.status == 'pending_payment' %}
+    <a href="{% url 'bookings:cancel' booking.pk %}" class="btn btn-outline-danger mt-2">
+      <i class="bi bi-x-circle me-1"></i>Cancel Booking
+    </a>
+    {% endif %}
+  </div>
+
+  <!-- Side Panel -->
+  <div class="col-md-4">
+    <!-- Receipt Link -->
+    {% if booking.status == 'confirmed' or booking.status == 'active' %}
+    <div class="card mb-3 border-success">
+      <div class="card-body text-center">
+        <div style="font-size:2rem;">🧾</div>
+        <div class="fw-bold text-success">Digital Receipt Issued</div>
+        <div class="text-muted mb-3" style="font-size:.82rem;">Your digital warehouse receipt is ready</div>
+        {% if booking.receipt %}
+          <a href="{% url 'receipts:detail' booking.receipt.pk %}" class="btn btn-success btn-sm w-100 mb-2">
+            <i class="bi bi-file-earmark-text me-1"></i>View Receipt
+          </a>
+          <a href="{% url 'receipts:print' booking.receipt.pk %}" class="btn btn-outline-secondary btn-sm w-100">
+            <i class="bi bi-printer me-1"></i>Print Receipt
+          </a>
+        {% endif %}
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- Inventory / Withdrawal -->
+    {% if booking.status == 'confirmed' or booking.status == 'active' %}
+    <div class="card">
+      <div class="card-body">
+        <h6 class="fw-bold"><i class="bi bi-box-seam me-2"></i>Storage Actions</h6>
+        {% if user.is_farmer %}
+          {% if booking.inventory_record %}
+          <a href="{% url 'inventory:detail' booking.inventory_record.pk %}" class="btn btn-outline-secondary btn-sm w-100 mb-2">
+            View Inventory Record
+          </a>
+          <a href="{% url 'withdrawals:schedule' booking.inventory_record.pk %}" class="btn btn-outline-warning btn-sm w-100">
+            <i class="bi bi-arrow-down-circle me-1"></i>Schedule Withdrawal
+          </a>
+          {% endif %}
+        {% endif %}
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- Warehouse Info -->
+    <div class="card mt-3">
+      <div class="card-body">
+        <h6 class="fw-bold"><i class="bi bi-building me-2"></i>Warehouse Contact</h6>
+        <div style="font-size:.85rem;">
+          <div class="mb-1"><i class="bi bi-telephone me-2 text-muted"></i>{{ booking.warehouse.contact_phone }}</div>
+          {% if booking.warehouse.contact_email %}
+          <div><i class="bi bi-envelope me-2 text-muted"></i>{{ booking.warehouse.contact_email }}</div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

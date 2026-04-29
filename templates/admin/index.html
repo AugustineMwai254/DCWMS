@@ -1,0 +1,41 @@
+{% extends "admin/index.html" %}
+{% load static %}
+
+{% block extrastyle %}
+{{ block.super }}
+<link rel="stylesheet" href="{% static 'css/admin-dashboard.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-hero">
+  <div class="hero-copy">
+    <p class="eyebrow">Admin Control Center</p>
+    <h1>Welcome back, {{ user.get_full_name|default:user.username }}.</h1>
+    <p class="hero-description">Manage farmers, warehouses, bookings, inventory, receipts, and withdrawals from a clean, fast admin experience.</p>
+  </div>
+  <div class="hero-card">
+    <span class="card-label">Quick actions</span>
+    <ul>
+      <li><a href="{% url 'admin:accounts_user_add' %}">Create user</a></li>
+      <li><a href="{% url 'admin:warehouses_warehouse_add' %}">Add warehouse</a></li>
+      <li><a href="{% url 'admin:bookings_booking_add' %}">Submit booking</a></li>
+    </ul>
+  </div>
+</div>
+
+<div class="app-grid">
+  {% for app in app_list %}
+    <section class="app-card">
+      <div class="app-card-header">
+        <h2>{{ app.name }}</h2>
+        <span class="app-badge">{{ app.models|length }} items</span>
+      </div>
+      <ul class="model-list">
+        {% for model in app.models %}
+          <li><a href="{{ model.admin_url }}">{{ model.name }}</a></li>
+        {% endfor %}
+      </ul>
+    </section>
+  {% endfor %}
+</div>
+{% endblock %}

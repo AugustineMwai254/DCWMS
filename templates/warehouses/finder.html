@@ -1,0 +1,129 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <div>
+    <h4 class="mb-0" style="font-family:'Nunito',sans-serif;font-weight:800;">🔍 Find a Warehouse</h4>
+    <p class="text-muted mb-0" style="font-size:.85rem;">{{ total_results }} certified warehouses found</p>
+  </div>
+</div>
+
+<!-- Search Form -->
+<div class="card mb-4">
+  <div class="card-body">
+    <form method="get" class="row g-2 align-items-end">
+      <div class="col-12 col-md-4">
+        <label class="form-label">Search</label>
+        <input type="text" name="q" class="form-control" placeholder="Warehouse name or location..." value="{{ request.GET.q }}">
+      </div>
+      <div class="col-6 col-md-2">
+        <label class="form-label">County</label>
+        <select name="county" class="form-select">
+          <option value="">All Counties</option>
+          {% for code, name in counties %}
+            <option value="{{ code }}" {% if request.GET.county == code %}selected{% endif %}>{{ name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-6 col-md-2">
+        <label class="form-label">Sub-County</label>
+        <input type="text" name="sub_county" class="form-control" placeholder="Sub-county" value="{{ request.GET.sub_county }}">
+      </div>
+      <div class="col-6 col-md-2">
+        <label class="form-label">Sort By</label>
+        <select name="sort" class="form-select">
+          <option value="" {% if not request.GET.sort %}selected{% endif %}>Best Match</option>
+          <option value="nearest" {% if request.GET.sort == 'nearest' %}selected{% endif %}>Nearest Warehouse</option>
+        </select>
+      </div>
+      <div class="col-6 col-md-2">
+        <label class="form-label">Min. Capacity (MT)</label>
+        <input type="number" name="min_capacity" class="form-control" placeholder="e.g. 10" value="{{ request.GET.min_capacity }}" min="0" step="0.1">
+      </div>
+      <div class="col-6 col-md-2 d-flex flex-column gap-1">
+        <div class="form-check mt-4">
+          <input class="form-check-input" type="checkbox" name="certified_only" id="certOnly" {% if request.GET.certified_only %}checked{% endif %}>
+          <label class="form-check-label" for="certOnly" style="font-size:.85rem;">Certified Only</label>
+        </div>
+        <button type="submit" class="btn btn-green btn-sm">Search</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Results -->
+{% if warehouses %}
+<div class="row g-3">
+  {% for w in warehouses %}
+  <div class="col-12 col-md-6 col-lg-4">
+    <div class="card warehouse-card h-100" onclick="location.href='{% url 'warehouses:detail' w.pk %}'">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-start mb-2">
+          <h6 class="mb-0" style="font-weight:700;">{{ w.name }}</h6>
+          {% if w.is_certified %}
+            <span class="cert-badge"><i class="bi bi-patch-check-fill me-1"></i>Certified</span>
+          {% endif %}
+        </div>
+        <div class="text-muted" style="font-size:.82rem;margin-bottom:.75rem;">
+          <i class="bi bi-geo-alt me-1"></i>{{ w.sub_county }}, {{ w.county }}
+        </div>
+
+        <!-- Capacity Bar -->
+        <div class="mb-2">
+          <div class="d-flex justify-content-between mb-1" style="font-size:.78rem;">
+            <span>Capacity Available</span>
+            <span style="font-weight:600;color:{% if w.utilization_percent > 85 %}#dc3545{% elif w.utilization_percent > 60 %}#f0a500{% else %}#1e7e34{% endif %};">
+              {{ w.available_capacity_mt }} MT free
+            </span>
+          </div>
+          <div class="capacity-bar">
+            <div class="capacity-fill" style="width:{{ w.utilization_percent }}%;background:{% if w.utilization_percent > 85 %}#dc3545{% elif w.utilization_percent > 60 %}#f0a500{% else %}#1e7e34{% endif %};"></div>
+          </div>
+          <div style="font-size:.75rem;color:#6c757d;margin-top:.25rem;">{{ w.utilization_percent }}% full &bull; {{ w.available_bags }} bags available</div>
+        </div>
+
+        <div class="row g-1 mb-3" style="font-size:.78rem;">
+          <div class="col-6"><i class="bi bi-layers me-1 text-muted"></i>{{ w.get_storage_type_display }}</div>
+          <div class="col-6"><i class="bi bi-currency-exchange me-1 text-muted"></i>KES {{ w.storage_fee_per_bag_month }}/bag/mo</div>
+          {% if w.has_pest_control %}<div class="col-6"><i class="bi bi-shield-check me-1 text-success"></i>Pest Control</div>{% endif %}
+          {% if w.accepts_wrs %}<div class="col-6"><i class="bi bi-receipt me-1 text-success"></i>WRS Receipts</div>{% endif %}
+        </div>
+
+        <div class="d-flex gap-2">
+          <a href="{% url 'warehouses:detail' w.pk %}" class="btn btn-sm btn-outline-secondary flex-grow-1" onclick="event.stopPropagation()">Details</a>
+          {% if user.is_authenticated and user.is_farmer %}
+            <a href="{% url 'bookings:create' w.pk %}" class="btn btn-sm btn-green flex-grow-1" onclick="event.stopPropagation()">
+              Book Space
+            </a>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+<!-- Pagination -->
+{% if warehouses.has_other_pages %}
+<nav class="mt-4">
+  <ul class="pagination justify-content-center">
+    {% if warehouses.has_previous %}
+      <li class="page-item"><a class="page-link" href="?page={{ warehouses.previous_page_number }}&{{ request.GET.urlencode }}">Previous</a></li>
+    {% endif %}
+    <li class="page-item disabled"><span class="page-link">Page {{ warehouses.number }} of {{ warehouses.paginator.num_pages }}</span></li>
+    {% if warehouses.has_next %}
+      <li class="page-item"><a class="page-link" href="?page={{ warehouses.next_page_number }}&{{ request.GET.urlencode }}">Next</a></li>
+    {% endif %}
+  </ul>
+</nav>
+{% endif %}
+
+{% else %}
+<div class="text-center py-5">
+  <div style="font-size:3rem;">🏭</div>
+  <h5 class="mt-2">No warehouses found</h5>
+  <p class="text-muted">Try adjusting your search filters or removing the minimum capacity requirement.</p>
+  <a href="{% url 'warehouses:finder' %}" class="btn btn-outline-secondary">Clear Filters</a>
+</div>
+{% endif %}
+{% endblock %}

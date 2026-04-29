@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h4 class="mb-0" style="font-family:'Nunito',sans-serif;font-weight:800;">
+    <i class="bi bi-calendar-check me-2"></i>{{ title }}
+  </h4>
+  {% if user.is_farmer %}
+  <a href="{% url 'warehouses:finder' %}" class="btn btn-green btn-sm">
+    <i class="bi bi-plus me-1"></i>New Booking
+  </a>
+  {% endif %}
+</div>
+
+<!-- Status Filter -->
+<div class="card mb-3">
+  <div class="card-body py-2">
+    <div class="d-flex gap-2 flex-wrap align-items-center">
+      <span style="font-size:.82rem;font-weight:600;color:#6c757d;">Filter:</span>
+      <a href="?" class="btn btn-sm {% if not status_filter %}btn-green{% else %}btn-outline-secondary{% endif %}">All</a>
+      {% for val, label in STATUS_CHOICES %}
+        <a href="?status={{ val }}" class="btn btn-sm {% if status_filter == val %}btn-green{% else %}btn-outline-secondary{% endif %}">
+          {{ label }}
+        </a>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-body p-0">
+    {% if bookings %}
+    <div class="table-responsive">
+      <table class="table mb-0">
+        <thead><tr>
+          <th>Reference</th>
+          <th>{% if user.is_operator %}Farmer{% else %}Warehouse{% endif %}</th>
+          <th>Cereal</th>
+          <th>Bags</th>
+          <th>Storage Start</th>
+          <th>Fee (KES)</th>
+          <th>Status</th>
+          <th>Action</th>
+        </tr></thead>
+        <tbody>
+          {% for b in bookings %}
+          <tr>
+            <td><code style="font-size:.83rem;">{{ b.booking_ref_human }}</code></td>
+            <td>
+              {% if user.is_operator %}
+                <div style="font-weight:600;font-size:.88rem;">{{ b.farmer.get_full_name }}</div>
+                <div style="font-size:.75rem;color:#6c757d;">{{ b.farmer.county }}</div>
+              {% else %}
+                <div style="font-weight:600;font-size:.88rem;">{{ b.warehouse.name }}</div>
+                <div style="font-size:.75rem;color:#6c757d;">{{ b.warehouse.county }}</div>
+              {% endif %}
+            </td>
+            <td class="text-capitalize" style="font-size:.88rem;">{{ b.cereal_type }}</td>
+            <td style="font-size:.88rem;">{{ b.quantity_bags }}</td>
+            <td style="font-size:.83rem;">{{ b.storage_start_date|date:"d M Y" }}</td>
+            <td style="font-size:.85rem;font-weight:600;">{{ b.total_fee_kes|floatformat:0 }}</td>
+            <td><span class="badge badge-{{ b.status }} rounded-pill">{{ b.get_status_display }}</span></td>
+            <td>
+              <a href="{% url 'bookings:detail' b.pk %}" class="btn btn-sm btn-outline-secondary">
+                {% if user.is_operator and b.status == 'pending' %}Review{% else %}View{% endif %}
+              </a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+      <div class="text-center py-5 text-muted">
+        <i class="bi bi-calendar-x" style="font-size:2.5rem;display:block;margin-bottom:.5rem;"></i>
+        No bookings found.
+        {% if user.is_farmer %}<br><a href="{% url 'warehouses:finder' %}">Find a warehouse to book storage</a>{% endif %}
+      </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,1772 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DCWMS – Digital Cereal Warehouse Management System</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ===== ROOT VARIABLES ===== */
+:root {
+  --g1:#1e7e34; --g2:#155724; --g3:#0a3d16;
+  --amber:#f0a500; --amber2:#856404;
+  --red:#dc3545; --blue:#0d6efd;
+  --bg:#f0f4f0;
+  --sidebar:250px; --topbar:60px;
+  --card:#fff; --border:#e2e8e0;
+  --text:#1a2e1a; --muted:#6b7c6b;
+}
+
+/* ===== RESET & BASE ===== */
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);font-size:14px}
+h1,h2,h3,h4,h5,h6,.brand{font-family:'Nunito',sans-serif}
+a{text-decoration:none;color:inherit}
+input,select,textarea,button{font-family:inherit;font-size:inherit}
+
+/* ===== SCREENS ===== */
+.screen{display:none;min-height:100vh}
+.screen.active{display:block}
+
+/* ===== AUTH SCREENS ===== */
+.auth-bg{
+  background:linear-gradient(135deg,var(--g1) 0%,var(--g2) 50%,var(--g3) 100%);
+  min-height:100vh; display:flex; align-items:center; justify-content:center; padding:2rem 1rem;
+}
+.auth-card{
+  background:#fff; border-radius:20px; padding:2.5rem;
+  width:100%; max-width:460px; box-shadow:0 20px 60px rgba(0,0,0,.35);
+}
+.auth-card.wide{max-width:640px}
+.brand-logo{font-size:1.9rem;font-weight:900;color:var(--g1);letter-spacing:-1px}
+.brand-logo span{color:var(--amber)}
+.auth-sub{color:var(--muted);font-size:.85rem;margin:.3rem 0 1.5rem}
+
+/* ===== FORM ELEMENTS ===== */
+.form-group{margin-bottom:1rem}
+.form-group label{display:block;font-weight:600;font-size:.82rem;margin-bottom:.3rem;color:var(--text)}
+.form-control{
+  width:100%;padding:.6rem .85rem;border:1.5px solid #d1d9d1;border-radius:9px;
+  font-size:.9rem;transition:border .2s,box-shadow .2s;background:#fff;
+}
+.form-control:focus{outline:none;border-color:var(--g1);box-shadow:0 0 0 3px rgba(30,126,52,.15)}
+.form-row{display:grid;gap:1rem}
+.form-row.cols-2{grid-template-columns:1fr 1fr}
+.form-row.cols-3{grid-template-columns:1fr 1fr 1fr}
+.form-hint{font-size:.75rem;color:var(--muted);margin-top:.25rem}
+.section-title{
+  font-family:'Nunito',sans-serif;font-weight:700;font-size:.95rem;
+  color:var(--g2);border-bottom:2px solid #d4edda;padding-bottom:.4rem;
+  margin:1.5rem 0 1rem;
+}
+
+/* ===== BUTTONS ===== */
+.btn{
+  display:inline-flex;align-items:center;gap:.4rem;
+  padding:.55rem 1.1rem;border-radius:9px;font-weight:600;font-size:.88rem;
+  cursor:pointer;border:none;transition:all .2s;white-space:nowrap;
+}
+.btn:hover{opacity:.88;transform:translateY(-1px)}
+.btn:active{transform:translateY(0)}
+.btn-primary{background:var(--g1);color:#fff}
+.btn-secondary{background:#e8ede8;color:var(--text)}
+.btn-warning{background:var(--amber);color:#fff}
+.btn-danger{background:var(--red);color:#fff}
+.btn-outline{background:transparent;border:1.5px solid var(--g1);color:var(--g1)}
+.btn-outline-muted{background:transparent;border:1.5px solid #d1d9d1;color:var(--muted)}
+.btn-sm{padding:.35rem .75rem;font-size:.8rem}
+.btn-lg{padding:.75rem 1.8rem;font-size:1rem}
+.btn-full{width:100%;justify-content:center}
+.btn-icon{padding:.4rem;border-radius:7px}
+
+/* ===== APP LAYOUT ===== */
+.app-layout{display:flex;flex-direction:column;min-height:100vh}
+
+/* TOP BAR */
+.topbar{
+  position:fixed;top:0;left:0;right:0;height:var(--topbar);
+  background:var(--g1);color:#fff;display:flex;align-items:center;
+  padding:0 1rem;gap:.75rem;z-index:100;
+  box-shadow:0 2px 12px rgba(0,0,0,.2);
+}
+.topbar .brand{font-size:1.25rem;font-weight:900;color:#fff;letter-spacing:-0.5px}
+.topbar .brand span{color:var(--amber)}
+.topbar-right{margin-left:auto;display:flex;align-items:center;gap:.75rem}
+.topbar-user{font-size:.82rem;opacity:.9}
+.topbar-badge{
+  background:var(--amber);color:#fff;font-size:.68rem;font-weight:700;
+  padding:.15rem .45rem;border-radius:20px;
+}
+.btn-topbar{
+  background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.3);
+  padding:.35rem .75rem;border-radius:8px;font-size:.82rem;cursor:pointer;
+  transition:background .2s;
+}
+.btn-topbar:hover{background:rgba(255,255,255,.25)}
+
+/* SIDEBAR */
+.sidebar{
+  position:fixed;top:var(--topbar);left:0;bottom:0;width:var(--sidebar);
+  background:#fff;border-right:1px solid var(--border);
+  overflow-y:auto;z-index:90;
+  box-shadow:2px 0 12px rgba(0,0,0,.04);
+}
+.sidebar-user{
+  padding:1rem;border-bottom:1px solid var(--border);
+  background:linear-gradient(135deg,#f0f9f0,#e8f5e8);
+}
+.sidebar-user .name{font-weight:700;font-size:.95rem}
+.sidebar-user .role{font-size:.75rem;color:var(--g1);font-weight:600;margin-top:.1rem}
+.nav-section{font-size:.68rem;font-weight:700;color:#9aaa9a;text-transform:uppercase;
+  letter-spacing:1.2px;padding:1.1rem 1rem .3rem}
+.nav-link{
+  display:flex;align-items:center;gap:.6rem;
+  padding:.58rem 1rem;border-radius:9px;margin:1px 8px;
+  color:#3d5a3d;font-size:.87rem;font-weight:500;cursor:pointer;transition:all .15s;
+}
+.nav-link:hover{background:#e8f5e8;color:var(--g2)}
+.nav-link.active{background:#d4edda;color:var(--g2);font-weight:700}
+.nav-link .icon{font-size:1.05rem;width:20px;text-align:center}
+.nav-badge{
+  margin-left:auto;background:var(--red);color:#fff;
+  font-size:.65rem;padding:.1rem .4rem;border-radius:10px;font-weight:700;
+}
+
+/* MAIN CONTENT */
+.main{
+  margin-left:var(--sidebar);
+  padding-top:calc(var(--topbar) + 1.5rem);
+  padding:calc(var(--topbar) + 1.5rem) 1.5rem 2rem;
+  min-height:100vh;
+}
+
+/* ===== PAGE HEADER ===== */
+.page-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:1.5rem;flex-wrap:wrap;gap:.75rem}
+.page-title{font-size:1.4rem;font-weight:800;color:var(--text)}
+.page-sub{font-size:.82rem;color:var(--muted);margin-top:.15rem}
+.breadcrumb{display:flex;gap:.3rem;align-items:center;font-size:.8rem;color:var(--muted);margin-bottom:.5rem}
+.breadcrumb a{color:var(--g1);cursor:pointer}
+.breadcrumb a:hover{text-decoration:underline}
+.breadcrumb span{color:var(--muted)}
+
+/* ===== CARDS ===== */
+.card{background:var(--card);border-radius:14px;border:1px solid var(--border);box-shadow:0 1px 4px rgba(0,0,0,.04)}
+.card-header{
+  padding:.9rem 1.25rem;border-bottom:1px solid var(--border);
+  font-weight:700;font-size:.9rem;display:flex;justify-content:space-between;align-items:center;
+  border-radius:14px 14px 0 0;
+}
+.card-body{padding:1.25rem}
+.card-body.p0{padding:0}
+
+/* STAT CARDS */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:1.5rem}
+.stat-card{background:var(--card);border-radius:14px;border:1px solid var(--border);padding:1.25rem;box-shadow:0 1px 4px rgba(0,0,0,.04)}
+.stat-card .s-top{display:flex;justify-content:space-between;align-items:flex-start}
+.stat-card .s-icon{width:46px;height:46px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:1.3rem}
+.stat-card .s-num{font-size:1.9rem;font-weight:900;font-family:'Nunito',sans-serif;line-height:1.1;margin-top:.5rem}
+.stat-card .s-label{font-size:.76rem;color:var(--muted);margin-top:.15rem}
+
+/* ===== TABLE ===== */
+.table-wrap{overflow-x:auto;border-radius:0 0 14px 14px}
+table{width:100%;border-collapse:collapse}
+th{font-size:.72rem;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);padding:.75rem 1rem;text-align:left;background:#fafcfa;border-bottom:1px solid var(--border)}
+td{padding:.75rem 1rem;border-bottom:1px solid var(--border);font-size:.88rem;vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:#f8fbf8}
+
+/* ===== BADGES ===== */
+.badge{display:inline-block;padding:.2rem .65rem;border-radius:20px;font-size:.73rem;font-weight:700;white-space:nowrap}
+.badge-pending{background:#fff3cd;color:#856404}
+.badge-approved{background:#d4edda;color:#155724}
+.badge-rejected{background:#f8d7da;color:#721c24}
+.badge-completed{background:#cce5ff;color:#004085}
+.badge-cancelled{background:#e2e3e5;color:#383d41}
+.badge-stored{background:#d4edda;color:#155724}
+.badge-valid{background:#d4edda;color:#155724}
+.badge-active{background:#d4edda;color:#155724}
+.badge-inactive{background:#e2e3e5;color:#383d41}
+
+/* ===== CAPACITY BAR ===== */
+.cap-bar{height:8px;background:#e8ede8;border-radius:4px;overflow:hidden}
+.cap-fill{height:100%;border-radius:4px;transition:width .5s}
+.cap-low{background:var(--g1)} .cap-mid{background:var(--amber)} .cap-high{background:var(--red)}
+
+/* ===== WAREHOUSE CARDS ===== */
+.wh-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:1rem}
+.wh-card{
+  background:var(--card);border-radius:14px;border:1px solid var(--border);
+  padding:1.25rem;cursor:pointer;transition:transform .2s,box-shadow .2s;
+}
+.wh-card:hover{transform:translateY(-3px);box-shadow:0 8px 24px rgba(0,0,0,.1)}
+.wh-card .wh-name{font-weight:700;font-size:.97rem;margin-bottom:.2rem}
+.wh-card .wh-loc{font-size:.78rem;color:var(--muted);margin-bottom:.75rem}
+.cert-tag{background:#d4edda;color:#155724;font-size:.68rem;font-weight:700;padding:.15rem .5rem;border-radius:20px}
+.wh-features{display:flex;gap:.35rem;flex-wrap:wrap;margin:.75rem 0}
+.wh-feat{background:#f0f4f0;color:#3d5a3d;font-size:.7rem;padding:.15rem .45rem;border-radius:20px}
+.wh-actions{display:flex;gap:.5rem;margin-top:.9rem}
+
+/* ===== RECEIPT ===== */
+.receipt-card{border:2px solid var(--g1);border-radius:16px;overflow:hidden;max-width:560px;margin:0 auto}
+.receipt-head{background:linear-gradient(135deg,var(--g1),var(--g2));color:#fff;padding:1.75rem;text-align:center}
+.receipt-head .r-code{background:rgba(255,255,255,.18);border-radius:8px;padding:.4rem .9rem;display:inline-block;font-size:1.1rem;font-weight:800;letter-spacing:1px;margin-top:.6rem}
+.receipt-body{padding:1.5rem}
+.r-section{font-size:.7rem;font-weight:700;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin:1rem 0 .5rem}
+.r-row{display:flex;justify-content:space-between;padding:.4rem 0;border-bottom:1px dashed #e0e8e0;font-size:.88rem}
+.r-row:last-child{border:none}
+.r-label{color:var(--muted)}
+.r-val{font-weight:600}
+.r-hash{font-size:.65rem;word-break:break-all;background:#f0f4f0;padding:.5rem;border-radius:7px;color:#5a6b5a;margin-top:.75rem;font-family:monospace}
+
+/* ===== FORM SECTIONS ===== */
+.form-section{background:var(--card);border-radius:14px;border:1px solid var(--border);padding:1.5rem;margin-bottom:1.25rem}
+.check-group{display:flex;align-items:center;gap:.5rem;cursor:pointer;padding:.4rem 0}
+.check-group input[type=checkbox]{width:16px;height:16px;accent-color:var(--g1);cursor:pointer}
+.check-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:.25rem}
+
+/* ===== ALERTS & MESSAGES ===== */
+.alert{padding:.75rem 1rem;border-radius:10px;margin-bottom:1rem;font-size:.88rem;display:flex;align-items:center;gap:.5rem}
+.alert-success{background:#d4edda;color:#155724}
+.alert-warning{background:#fff3cd;color:#856404}
+.alert-danger{background:#f8d7da;color:#721c24}
+.alert-info{background:#cce5ff;color:#004085}
+
+/* ===== SEARCH BAR ===== */
+.search-bar{display:flex;gap:.75rem;flex-wrap:wrap;align-items:flex-end}
+.search-bar .form-group{margin:0;flex:1;min-width:140px}
+
+/* ===== EMPTY STATE ===== */
+.empty-state{text-align:center;padding:3.5rem 1rem;color:var(--muted)}
+.empty-state .e-icon{font-size:3rem;display:block;margin-bottom:.75rem}
+.empty-state h5{font-size:1rem;color:var(--text);margin-bottom:.4rem}
+.empty-state p{font-size:.85rem}
+
+/* ===== MOBILE SIDEBAR TOGGLE ===== */
+.sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:89}
+.btn-menu{display:none;background:none;border:none;color:#fff;font-size:1.5rem;cursor:pointer;padding:.25rem}
+
+/* ===== CONFIRM MODAL ===== */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;align-items:center;justify-content:center}
+.modal-overlay.open{display:flex}
+.modal-box{background:#fff;border-radius:18px;padding:2rem;max-width:420px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+.modal-title{font-size:1.1rem;font-weight:800;margin-bottom:.5rem}
+.modal-actions{display:flex;gap:.75rem;margin-top:1.5rem;justify-content:flex-end}
+
+/* ===== UTILITY ===== */
+.flex{display:flex} .items-center{align-items:center} .justify-between{justify-content:space-between}
+.flex-wrap{flex-wrap:wrap} .gap-sm{gap:.5rem} .gap-md{gap:.75rem} .gap-lg{gap:1rem}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem}
+.mt1{margin-top:.5rem} .mt2{margin-top:1rem} .mt3{margin-top:1.5rem}
+.mb1{margin-bottom:.5rem} .mb2{margin-bottom:1rem} .mb3{margin-bottom:1.5rem}
+.text-green{color:var(--g1)} .text-amber{color:var(--amber)} .text-red{color:var(--red)}
+.text-muted{color:var(--muted)} .text-center{text-align:center} .fw-bold{font-weight:700}
+.capitalize{text-transform:capitalize} .mono{font-family:monospace}
+.p-hint{font-size:.78rem;color:var(--muted);margin-top:.25rem}
+.divider{height:1px;background:var(--border);margin:1rem 0}
+.tag{background:#e8f5e8;color:var(--g2);font-size:.75rem;font-weight:600;padding:.2rem .55rem;border-radius:20px}
+
+/* ===== FEE PREVIEW ===== */
+.fee-preview{background:#d4edda;border-radius:10px;padding:1rem;margin:1rem 0;display:none}
+.fee-preview .fee-amount{font-size:1.4rem;font-weight:900;color:var(--g1);font-family:'Nunito',sans-serif}
+
+/* ===== RESPONSIVE ===== */
+@media(max-width:768px){
+  .sidebar{transform:translateX(-100%);transition:transform .3s}
+  .sidebar.open{transform:translateX(0)}
+  .sidebar-overlay.open{display:block}
+  .main{margin-left:0;padding:calc(var(--topbar) + 1rem) .75rem 2rem}
+  .stats-grid{grid-template-columns:1fr 1fr}
+  .form-row.cols-2,.form-row.cols-3{grid-template-columns:1fr}
+  .grid-2,.grid-3{grid-template-columns:1fr}
+  .btn-menu{display:block}
+  .topbar-user{display:none}
+  .check-grid{grid-template-columns:1fr 1fr}
+}
+@media(max-width:480px){
+  .stats-grid{grid-template-columns:1fr 1fr}
+  .auth-card{padding:1.75rem 1.25rem}
+}
+</style>
+</head>
+<body>
+
+<!-- ======================================================
+     SCREEN 1: LOGIN
+     ====================================================== -->
+<div class="screen active" id="screen-login">
+<div class="auth-bg">
+<div class="auth-card">
+  <div class="text-center">
+    <div class="brand-logo">🌾 DC<span>WMS</span></div>
+    <div class="auth-sub">Digital Cereal Warehouse Management System</div>
+  </div>
+
+  <div class="form-group">
+    <label>Username</label>
+    <input class="form-control" id="login-user" placeholder="Enter your username" value="farmer_john">
+  </div>
+  <div class="form-group">
+    <label>Password</label>
+    <input type="password" class="form-control" placeholder="Password" value="password">
+  </div>
+  <button class="btn btn-primary btn-full btn-lg mt2" onclick="doLogin()">Sign In →</button>
+
+  <div style="text-align:center;color:var(--muted);font-size:.82rem;margin:1.25rem 0;position:relative;">
+    <span style="background:#fff;padding:0 .75rem;position:relative;z-index:1;">or register as</span>
+    <div style="position:absolute;top:50%;left:0;right:0;height:1px;background:var(--border);"></div>
+  </div>
+  <div class="form-row cols-2">
+    <button class="btn btn-outline btn-full" onclick="showScreen('screen-reg-farmer')">🌾 Farmer</button>
+    <button class="btn btn-outline-muted btn-full" onclick="showScreen('screen-reg-operator')">🏭 Operator</button>
+  </div>
+
+  <div style="margin-top:1.25rem;background:#f0f9f0;border-radius:10px;padding:.85rem;">
+    <div style="font-size:.73rem;font-weight:700;color:#3d5a3d;margin-bottom:.4rem;">DEMO ACCOUNTS</div>
+    <div style="font-size:.78rem;color:var(--muted);line-height:1.8;">
+      🌾 Farmer: <b>farmer_john</b> | 🏭 Operator: <b>operator_wanjiku</b> | 👑 Admin: <b>admin</b>
+    </div>
+  </div>
+  <div style="text-align:center;margin-top:1rem;">
+    <a onclick="showScreen('screen-verify')" style="font-size:.8rem;color:var(--g1);cursor:pointer;">🛡️ Verify a Receipt (public)</a>
+  </div>
+</div>
+</div>
+</div>
+
+<!-- ======================================================
+     SCREEN 2: REGISTER FARMER
+     ====================================================== -->
+<div class="screen" id="screen-reg-farmer">
+<div class="auth-bg" style="padding:2rem 1rem">
+<div class="auth-card wide">
+  <div class="text-center mb2">
+    <div class="brand-logo">🌾 DC<span>WMS</span></div>
+    <div style="font-size:1.1rem;font-weight:700;margin-top:.5rem;">Register as a Farmer</div>
+  </div>
+  <div class="section-title">Personal Information</div>
+  <div class="form-row cols-2">
+    <div class="form-group"><label>First Name *</label><input class="form-control" placeholder="e.g. John"></div>
+    <div class="form-group"><label>Last Name *</label><input class="form-control" placeholder="e.g. Mwangi"></div>
+    <div class="form-group"><label>Username *</label><input class="form-control" placeholder="unique username"></div>
+    <div class="form-group"><label>National ID *</label><input class="form-control" placeholder="e.g. 12345678"></div>
+    <div class="form-group"><label>Phone Number *</label><input class="form-control" placeholder="0712345678"></div>
+    <div class="form-group"><label>Email</label><input type="email" class="form-control" placeholder="optional"></div>
+  </div>
+  <div class="section-title">Location</div>
+  <div class="form-row cols-3">
+    <div class="form-group"><label>County *</label>
+      <select class="form-control"><option>Nakuru</option><option>Kitui</option><option>Machakos</option><option>Trans Nzoia</option><option>Uasin Gishu</option><option>Bungoma</option><option>Meru</option></select>
+    </div>
+    <div class="form-group"><label>Sub-County *</label><input class="form-control" placeholder="e.g. Bahati"></div>
+    <div class="form-group"><label>Village</label><input class="form-control" placeholder="optional"></div>
+  </div>
+  <div class="section-title">Security</div>
+  <div class="form-row cols-2">
+    <div class="form-group"><label>Password *</label><input type="password" class="form-control"></div>
+    <div class="form-group"><label>Confirm Password *</label><input type="password" class="form-control"></div>
+  </div>
+  <div class="flex gap-md mt3" style="justify-content:space-between;align-items:center">
+    <a onclick="showScreen('screen-login')" style="font-size:.83rem;color:var(--g1);cursor:pointer;">← Already have an account</a>
+    <button class="btn btn-primary" onclick="registerFarmer()">Create Farmer Account</button>
+  </div>
+</div>
+</div>
+</div>
+
+<!-- ======================================================
+     SCREEN 3: REGISTER OPERATOR
+     ====================================================== -->
+<div class="screen" id="screen-reg-operator">
+<div class="auth-bg" style="padding:2rem 1rem">
+<div class="auth-card wide">
+  <div class="text-center mb2">
+    <div class="brand-logo">🌾 DC<span>WMS</span></div>
+    <div style="font-size:1.1rem;font-weight:700;margin-top:.5rem;">Register as a Warehouse Operator</div>
+  </div>
+  <div class="section-title">Personal & Company Details</div>
+  <div class="form-row cols-2">
+    <div class="form-group"><label>First Name *</label><input class="form-control" placeholder="e.g. Mary"></div>
+    <div class="form-group"><label>Last Name *</label><input class="form-control" placeholder="e.g. Wanjiku"></div>
+    <div class="form-group"><label>Username *</label><input class="form-control"></div>
+    <div class="form-group"><label>Company Name *</label><input class="form-control" placeholder="e.g. Nakuru Grain Stores Ltd"></div>
+    <div class="form-group"><label>Phone *</label><input class="form-control" placeholder="0712345678"></div>
+    <div class="form-group"><label>National ID *</label><input class="form-control"></div>
+  </div>
+  <div class="section-title">Security</div>
+  <div class="form-row cols-2">
+    <div class="form-group"><label>Password *</label><input type="password" class="form-control"></div>
+    <div class="form-group"><label>Confirm Password *</label><input type="password" class="form-control"></div>
+  </div>
+  <div class="flex gap-md mt3" style="justify-content:space-between;align-items:center">
+    <a onclick="showScreen('screen-login')" style="font-size:.83rem;color:var(--g1);cursor:pointer;">← Already have an account</a>
+    <button class="btn btn-primary" onclick="registerOperator()">Create Operator Account</button>
+  </div>
+</div>
+</div>
+</div>
+
+<!-- ======================================================
+     SCREEN 4: MAIN APP (authenticated)
+     ====================================================== -->
+<div class="screen" id="screen-app">
+<div class="app-layout">
+
+  <!-- TOP BAR -->
+  <div class="topbar">
+    <button class="btn-menu" onclick="toggleSidebar()">☰</button>
+    <a onclick="navigate('dashboard')" class="brand">🌾 DC<span>WMS</span></a>
+    <div class="topbar-right">
+      <span class="topbar-user">
+        <span id="topbar-name">John Kamau</span>
+        <span class="topbar-badge ms1" id="topbar-role">Farmer</span>
+      </span>
+      <button class="btn-topbar" onclick="doLogout()">Logout</button>
+    </div>
+  </div>
+
+  <!-- SIDEBAR OVERLAY (mobile) -->
+  <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
+
+  <!-- SIDEBAR -->
+  <nav class="sidebar" id="sidebar">
+    <div class="sidebar-user">
+      <div class="name" id="sidebar-name">John Kamau</div>
+      <div class="role" id="sidebar-role">Farmer</div>
+    </div>
+
+    <div class="nav-section">Main</div>
+    <a class="nav-link active" id="nav-dashboard" onclick="navigate('dashboard')"><span class="icon">📊</span> Dashboard</a>
+
+    <!-- Farmer nav -->
+    <div id="farmer-nav">
+      <div class="nav-section">Find & Book</div>
+      <a class="nav-link" id="nav-finder" onclick="navigate('finder')"><span class="icon">🔍</span> Find Warehouses</a>
+      <a class="nav-link" id="nav-bookings" onclick="navigate('bookings')"><span class="icon">📋</span> My Bookings</a>
+      <a class="nav-link" id="nav-receipts" onclick="navigate('receipts')"><span class="icon">🧾</span> My Receipts</a>
+      <a class="nav-link" id="nav-inventory" onclick="navigate('inventory')"><span class="icon">📦</span> My Storage</a>
+      <a class="nav-link" id="nav-withdrawals" onclick="navigate('withdrawals')"><span class="icon">📤</span> Withdrawals</a>
+    </div>
+
+    <!-- Operator nav -->
+    <div id="operator-nav" style="display:none">
+      <div class="nav-section">Operator Panel</div>
+      <a class="nav-link" id="nav-my-warehouses" onclick="navigate('my-warehouses')"><span class="icon">🏭</span> My Warehouses</a>
+      <a class="nav-link" id="nav-add-warehouse" onclick="navigate('add-warehouse')"><span class="icon">➕</span> Add Warehouse</a>
+      <a class="nav-link" id="nav-op-bookings" onclick="navigate('bookings')"><span class="icon">📋</span> Booking Requests <span class="nav-badge" id="pending-badge">0</span></a>
+      <a class="nav-link" id="nav-op-withdrawals" onclick="navigate('withdrawals')"><span class="icon">📤</span> Withdrawals</a>
+      <a class="nav-link" id="nav-op-inventory" onclick="navigate('inventory')"><span class="icon">📦</span> Inventory</a>
+    </div>
+
+    <div class="nav-section">More</div>
+    <a class="nav-link" id="nav-reports" onclick="navigate('reports')"><span class="icon">📈</span> Reports</a>
+    <a class="nav-link" id="nav-verify" onclick="navigate('verify-receipt')"><span class="icon">🛡️</span> Verify Receipt</a>
+    <a class="nav-link" id="nav-profile" onclick="navigate('profile')"><span class="icon">👤</span> My Profile</a>
+  </nav>
+
+  <!-- MAIN CONTENT -->
+  <main class="main" id="main-content">
+
+    <!-- *** PAGE: DASHBOARD *** -->
+    <div id="page-dashboard" class="page">
+      <div class="page-header">
+        <div>
+          <div class="page-title" id="dash-greeting">Welcome! 👋</div>
+          <div class="page-sub" id="dash-sub">Dashboard</div>
+        </div>
+        <div id="dash-action"></div>
+      </div>
+      <div class="stats-grid" id="dash-stats"></div>
+      <div id="dash-content"></div>
+    </div>
+
+    <!-- *** PAGE: WAREHOUSE FINDER *** -->
+    <div id="page-finder" class="page" style="display:none">
+      <div class="page-header">
+        <div>
+          <div class="page-title">🔍 Find a Warehouse</div>
+          <div class="page-sub" id="finder-count">Loading...</div>
+        </div>
+      </div>
+      <div class="card mb3">
+        <div class="card-body">
+          <div class="search-bar">
+            <div class="form-group"><label>Search</label><input class="form-control" id="search-q" placeholder="Name or location..." oninput="filterWarehouses()"></div>
+            <div class="form-group"><label>County</label>
+              <select class="form-control" id="search-county" onchange="filterWarehouses()">
+                <option value="">All Counties</option>
+                <option>Nakuru</option><option>Trans Nzoia</option><option>Uasin Gishu</option>
+                <option>Bungoma</option><option>Kitui</option><option>Machakos</option><option>Meru</option>
+                <option>Kisumu</option><option>Kakamega</option>
+              </select>
+            </div>
+            <div class="form-group"><label>Min. Capacity (MT)</label><input type="number" class="form-control" id="search-cap" placeholder="e.g. 20" oninput="filterWarehouses()" style="max-width:140px"></div>
+            <div class="form-group" style="align-self:flex-end">
+              <label class="check-group"><input type="checkbox" id="search-cert" onchange="filterWarehouses()"> <span>Certified only</span></label>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="wh-grid" id="wh-results"></div>
+    </div>
+
+    <!-- *** PAGE: BOOKING CREATE *** -->
+    <div id="page-book" class="page" style="display:none">
+      <div class="page-header">
+        <div>
+          <div class="breadcrumb"><a onclick="navigate('finder')">Find Warehouses</a><span>›</span><a id="book-wh-link" onclick="navigate('wh-detail')">Warehouse</a><span>›</span>Book Storage</div>
+          <div class="page-title">📋 Book Storage Space</div>
+        </div>
+      </div>
+      <div class="grid-2" style="gap:1.5rem">
+        <div>
+          <div class="form-section">
+            <div class="section-title">Grain Details</div>
+            <div class="form-row cols-2">
+              <div class="form-group"><label>Cereal Type *</label>
+                <select class="form-control" id="book-cereal">
+                  <option value="maize">Maize</option><option value="wheat">Wheat</option>
+                  <option value="sorghum">Sorghum</option><option value="millet">Millet</option>
+                  <option value="beans">Beans</option><option value="rice">Rice</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Number of Bags (90kg) *</label>
+                <input type="number" class="form-control" id="book-bags" min="1" placeholder="e.g. 50" oninput="updateBookingCalc()">
+                <div class="p-hint" id="book-bags-hint">Max available: calculating...</div>
+              </div>
+            </div>
+          </div>
+          <div class="form-section">
+            <div class="section-title">Storage Period</div>
+            <div class="form-row cols-2">
+              <div class="form-group"><label>Start Date *</label><input type="date" class="form-control" id="book-start" onchange="updateBookingCalc()"></div>
+              <div class="form-group"><label>End Date *</label><input type="date" class="form-control" id="book-end" onchange="updateBookingCalc()"></div>
+            </div>
+          </div>
+          <div class="fee-preview" id="fee-preview">
+            <div style="font-size:.78rem;color:var(--muted);margin-bottom:.25rem">ESTIMATED STORAGE FEE</div>
+            <div class="fee-amount">KES <span id="fee-amount">0</span></div>
+            <div style="font-size:.75rem;color:var(--muted)" id="fee-detail"></div>
+          </div>
+          <div class="form-section">
+            <div class="section-title">Notes (optional)</div>
+            <textarea class="form-control" id="book-notes" rows="3" placeholder="Any special requirements..."></textarea>
+          </div>
+          <button class="btn btn-primary btn-full btn-lg" onclick="submitBooking()">
+            📤 Submit Booking Request
+          </button>
+        </div>
+        <div>
+          <div class="card" style="position:sticky;top:80px">
+            <div class="card-body">
+              <div style="font-weight:700;color:var(--g1);margin-bottom:.75rem">🏭 <span id="book-wh-name">Warehouse</span></div>
+              <div class="grid-2 text-center mb2">
+                <div style="background:#d4edda;border-radius:9px;padding:.75rem">
+                  <div style="font-size:1.2rem;font-weight:800;color:var(--g1)" id="book-avail-mt">—</div>
+                  <div style="font-size:.72rem;color:var(--muted)">MT Available</div>
+                </div>
+                <div style="background:#fff3cd;border-radius:9px;padding:.75rem">
+                  <div style="font-size:1.2rem;font-weight:800;color:var(--amber2)" id="book-avail-bags">—</div>
+                  <div style="font-size:.72rem;color:var(--muted)">Bags Free</div>
+                </div>
+              </div>
+              <div id="book-wh-details" style="font-size:.83rem"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- *** PAGE: BOOKINGS LIST *** -->
+    <div id="page-bookings" class="page" style="display:none">
+      <div class="page-header">
+        <div class="page-title">📋 Bookings</div>
+        <div id="bookings-header-action"></div>
+      </div>
+      <div class="card mb2">
+        <div class="card-body" style="padding:.75rem 1rem">
+          <div class="flex gap-sm flex-wrap">
+            <span style="font-size:.8rem;color:var(--muted);align-self:center">Filter:</span>
+            <button class="btn btn-sm btn-primary" onclick="filterBookings('')" id="bfilt-all">All</button>
+            <button class="btn btn-sm btn-secondary" onclick="filterBookings('pending')" id="bfilt-pending">Pending</button>
+            <button class="btn btn-sm btn-secondary" onclick="filterBookings('approved')" id="bfilt-approved">Approved</button>
+            <button class="btn btn-sm btn-secondary" onclick="filterBookings('rejected')" id="bfilt-rejected">Rejected</button>
+            <button class="btn btn-sm btn-secondary" onclick="filterBookings('completed')" id="bfilt-completed">Completed</button>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Reference</th><th id="blist-col2">Warehouse</th><th>Cereal</th><th>Bags</th><th>Start Date</th><th>Fee (KES)</th><th>Status</th><th>Action</th></tr></thead>
+            <tbody id="bookings-table"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- *** PAGE: BOOKING DETAIL *** -->
+    <div id="page-booking-detail" class="page" style="display:none">
+      <div class="page-header">
+        <div>
+          <div class="breadcrumb"><a onclick="navigate('bookings')">Bookings</a><span>›</span>Detail</div>
+          <div class="page-title" id="bd-title">Booking</div>
+        </div>
+        <span class="badge" id="bd-status-badge">Pending</span>
+      </div>
+      <div class="grid-2" style="gap:1.5rem;align-items:start">
+        <div>
+          <div class="card mb2">
+            <div class="card-header">ℹ️ Booking Details</div>
+            <div class="card-body" id="bd-details"></div>
+          </div>
+          <div id="bd-actions"></div>
+        </div>
+        <div>
+          <div id="bd-receipt-panel"></div>
+          <div id="bd-storage-panel"></div>
+          <div class="card mt2">
+            <div class="card-body">
+              <div class="fw-bold mb1">📞 Warehouse Contact</div>
+              <div style="font-size:.85rem" id="bd-contact"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- *** PAGE: RECEIPTS *** -->
+    <div id="page-receipts" class="page" style="display:none">
+      <div class="page-header">
+        <div class="page-title">🧾 Digital Receipts</div>
+        <button class="btn btn-outline" onclick="navigate('verify-receipt')">🛡️ Verify Receipt</button>
+      </div>
+      <div class="card">
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Receipt Code</th><th>Warehouse</th><th>Cereal</th><th>Bags</th><th>Issued</th><th>Status</th><th>Action</th></tr></thead>
+            <tbody id="receipts-table"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- *** PAGE: RECEIPT DETAIL *** -->
+    <div id="page-receipt-detail" class="page" style="display:none">
+      <div class="page-header">
+        <div>
+          <div class="breadcrumb"><a onclick="navigate('receipts')">Receipts</a><span>›</span>Detail</div>
+          <div class="page-title">Digital Warehouse Receipt</div>
+        </div>
+        <button class="btn btn-outline-muted btn-sm" onclick="printReceipt()">🖨️ Print</button>
+      </div>
+      <div class="grid-2" style="gap:1.5rem;align-items:start">
+        <div id="receipt-display"></div>
+        <div>
+          <div class="card mb2">
+            <div class="card-body">
+              <div class="fw-bold mb1">Share & Verify</div>
+              <div style="font-size:.83rem;color:var(--muted);margin-bottom:.75rem">Share this code for anyone to verify your grain storage.</div>
+              <div class="flex gap-sm mb2">
+                <input class="form-control" id="receipt-code-display" readonly style="font-family:monospace;font-weight:700">
+                <button class="btn btn-outline btn-sm" onclick="copyReceiptCode()">📋</button>
+              </div>
+              <button class="btn btn-outline btn-full btn-sm" onclick="navigate('verify-receipt')">🛡️ Verify Online</button>
+            </div>
+          </div>
+          <div class="card" id="receipt-actions-panel"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- *** PAGE: INVENTORY *** -->
+    <div id="page-inventory" class="page" style="display:none">
+      <div class="page-header">
+        <div class="page-title">📦 Grain Inventory</div>
+      </div>
+      <div class="card">
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Warehouse</th><th>Farmer</th><th>Cereal</th><th>Original</th><th>Remaining</th><th>Status</th><th>Date</th><th>Action</th></tr></thead>
+            <tbody id="inventory-table"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- *** PAGE: WITHDRAWALS *** -->
+    <div id="page-withdrawals" class="page" style="display:none">
+      <div class="page-header">
+        <div class="page-title">📤 Withdrawal Requests</div>
+      </div>
+      <div class="card mb2">
+        <div class="card-body" style="padding:.75rem 1rem">
+          <div class="flex gap-sm flex-wrap">
+            <button class="btn btn-sm btn-primary" onclick="filterWithdrawals('')">All</button>
+            <button class="btn btn-sm btn-secondary" onclick="filterWithdrawals('pending')">Pending</button>
+            <button class="btn btn-sm btn-secondary" onclick="filterWithdrawals('approved')">Approved</button>
+            <button class="btn btn-sm btn-secondary" onclick="filterWithdrawals('completed')">Completed</button>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Reference</th><th>Farmer</th><th>Warehouse</th><th>Bags</th><th>Scheduled</th><th>Status</th><th>Action</th></tr></thead>
+            <tbody id="withdrawals-table"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- *** PAGE: SCHEDULE WITHDRAWAL *** -->
+    <div id="page-schedule-wd" class="page" style="display:none">
+      <div class="page-header">
+        <div>
+          <div class="breadcrumb"><a onclick="navigate('inventory')">My Storage</a><span>›</span>Schedule Withdrawal</div>
+          <div class="page-title">📤 Schedule Withdrawal</div>
+        </div>
+      </div>
+      <div class="grid-2" style="gap:1.5rem;align-items:start">
+        <div>
+          <div class="form-section">
+            <div class="section-title">Withdrawal Details</div>
+            <div class="form-row cols-2">
+              <div class="form-group">
+                <label>Bags to Withdraw *</label>
+                <input type="number" class="form-control" id="wd-bags" min="1" oninput="updateWdCalc()">
+                <div class="p-hint" id="wd-bags-hint"></div>
+              </div>
+              <div class="form-group">
+                <label>Scheduled Date *</label>
+                <input type="date" class="form-control" id="wd-date">
+              </div>
+            </div>
+            <div class="alert alert-warning mt1" id="wd-calc" style="display:none"></div>
+          </div>
+          <div class="form-section">
+            <div class="section-title">Notes (optional)</div>
+            <textarea class="form-control" id="wd-notes" rows="3" placeholder="Transport arrangements..."></textarea>
+          </div>
+          <button class="btn btn-warning btn-full btn-lg" onclick="submitWithdrawal()">📤 Submit Withdrawal Request</button>
+        </div>
+        <div>
+          <div class="card" style="position:sticky;top:80px">
+            <div class="card-body">
+              <div class="fw-bold text-green mb2">📦 Storage Summary</div>
+              <div id="wd-inventory-summary" style="font-size:.88rem"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- *** PAGE: MY WAREHOUSES *** -->
+    <div id="page-my-warehouses" class="page" style="display:none">
+      <div class="page-header">
+        <div class="page-title">🏭 My Warehouses</div>
+        <button class="btn btn-primary" onclick="navigate('add-warehouse')">➕ Add Warehouse</button>
+      </div>
+      <div class="wh-grid" id="my-wh-grid"></div>
+    </div>
+
+    <!-- *** PAGE: ADD/EDIT WAREHOUSE *** -->
+    <div id="page-add-warehouse" class="page" style="display:none">
+      <div class="page-header">
+        <div class="page-title" id="add-wh-title">🏭 Add Warehouse</div>
+      </div>
+      <div class="form-section">
+        <div class="section-title">Warehouse Information</div>
+        <div class="form-row cols-2">
+          <div class="form-group"><label>Warehouse Name *</label><input class="form-control" id="wh-name" placeholder="e.g. Nakuru Grain Stores"></div>
+          <div class="form-group"><label>Contact Phone *</label><input class="form-control" id="wh-phone" placeholder="0712345678"></div>
+          <div class="form-group"><label>Contact Email</label><input type="email" class="form-control" id="wh-email"></div>
+          <div class="form-group"><label>Physical Address *</label><input class="form-control" id="wh-address" placeholder="Street, Building name"></div>
+        </div>
+      </div>
+      <div class="form-section">
+        <div class="section-title">Location</div>
+        <div class="form-row cols-3">
+          <div class="form-group"><label>County *</label>
+            <select class="form-control" id="wh-county">
+              <option>Nakuru</option><option>Trans Nzoia</option><option>Uasin Gishu</option>
+              <option>Bungoma</option><option>Kitui</option><option>Machakos</option><option>Meru</option>
+            </select>
+          </div>
+          <div class="form-group"><label>Sub-County *</label><input class="form-control" id="wh-sub-county" placeholder="e.g. Bahati"></div>
+          <div class="form-group"><label>Village</label><input class="form-control" id="wh-village"></div>
+        </div>
+      </div>
+      <div class="form-section">
+        <div class="section-title">Capacity & Pricing</div>
+        <div class="form-row cols-3">
+          <div class="form-group"><label>Total Capacity (MT) *</label><input type="number" class="form-control" id="wh-capacity" min="1" step="0.1" placeholder="e.g. 500"></div>
+          <div class="form-group"><label>Storage Type *</label>
+            <select class="form-control" id="wh-storage-type">
+              <option value="bagged">Bagged Storage</option><option value="bulk">Bulk Storage</option>
+              <option value="both">Bulk & Bagged</option><option value="hermetic">Hermetic</option>
+            </select>
+          </div>
+          <div class="form-group"><label>Rate (KES/bag/month) *</label><input type="number" class="form-control" id="wh-rate" value="50" min="0" step="0.5"></div>
+        </div>
+      </div>
+      <div class="form-section">
+        <div class="section-title">Certification</div>
+        <div class="form-row cols-2">
+          <div class="form-group"><label>Certification Status *</label>
+            <select class="form-control" id="wh-cert">
+              <option value="wrsc">WRSC Certified</option><option value="ncpb">NCPB Certified</option>
+              <option value="both">NCPB & WRSC</option><option value="pending">Pending</option>
+            </select>
+          </div>
+          <div class="form-group"><label>Certification Expiry</label><input type="date" class="form-control" id="wh-cert-expiry"></div>
+        </div>
+      </div>
+      <div class="form-section">
+        <div class="section-title">Features</div>
+        <div class="check-grid">
+          <label class="check-group"><input type="checkbox" id="wh-pest" checked> Pest Control</label>
+          <label class="check-group"><input type="checkbox" id="wh-moisture"> Moisture Control</label>
+          <label class="check-group"><input type="checkbox" id="wh-security" checked> Security</label>
+          <label class="check-group"><input type="checkbox" id="wh-fumigation"> Fumigation</label>
+          <label class="check-group"><input type="checkbox" id="wh-wrs" checked> Accept WRS Receipts</label>
+        </div>
+      </div>
+      <div class="flex gap-md">
+        <button class="btn btn-primary btn-lg" onclick="saveWarehouse()">💾 Save Warehouse</button>
+        <button class="btn btn-secondary" onclick="navigate('my-warehouses')">Cancel</button>
+      </div>
+    </div>
+
+    <!-- *** PAGE: WAREHOUSE DETAIL *** -->
+    <div id="page-wh-detail" class="page" style="display:none">
+      <div class="page-header">
+        <div>
+          <div class="breadcrumb"><a onclick="navigate('finder')">Find Warehouses</a><span>›</span>Detail</div>
+          <div class="page-title" id="whd-name">Warehouse</div>
+          <div class="page-sub" id="whd-loc"></div>
+        </div>
+        <div class="flex gap-sm" id="whd-actions"></div>
+      </div>
+      <div class="grid-2" style="gap:1.5rem;align-items:start">
+        <div>
+          <div class="card mb2">
+            <div class="card-body" id="whd-capacity"></div>
+          </div>
+          <div class="card">
+            <div class="card-header">Warehouse Features</div>
+            <div class="card-body" id="whd-features"></div>
+          </div>
+        </div>
+        <div>
+          <div class="card mb2">
+            <div class="card-body" id="whd-info"></div>
+          </div>
+          <div id="whd-book-btn"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- *** PAGE: REPORTS *** -->
+    <div id="page-reports" class="page" style="display:none">
+      <div class="page-header">
+        <div class="page-title">📈 Reports & Analytics</div>
+      </div>
+      <div id="reports-content"></div>
+    </div>
+
+    <!-- *** PAGE: VERIFY RECEIPT *** -->
+    <div id="page-verify-receipt" class="page" style="display:none">
+      <div style="max-width:560px;margin:0 auto">
+        <div class="text-center mb3">
+          <div style="font-size:3rem">🛡️</div>
+          <div class="page-title">Verify Receipt</div>
+          <div class="page-sub">Enter a receipt code to verify authenticity</div>
+        </div>
+        <div class="card mb3">
+          <div class="card-body">
+            <div class="flex gap-sm">
+              <input class="form-control" id="verify-input" placeholder="e.g. RC-A1B2C3D4" style="font-family:monospace;font-weight:600">
+              <button class="btn btn-primary" onclick="verifyReceipt()">Verify</button>
+            </div>
+          </div>
+        </div>
+        <div id="verify-result"></div>
+      </div>
+    </div>
+
+    <!-- *** PAGE: PROFILE *** -->
+    <div id="page-profile" class="page" style="display:none">
+      <div class="page-header">
+        <div class="page-title">👤 My Profile</div>
+        <button class="btn btn-primary" onclick="saveProfile()">💾 Save Changes</button>
+      </div>
+      <div class="form-section" id="profile-content"></div>
+    </div>
+
+  </main><!-- /main -->
+</div><!-- /app-layout -->
+</div><!-- /screen-app -->
+
+<!-- *** SCREEN: PUBLIC VERIFY *** -->
+<div class="screen" id="screen-verify">
+<div class="auth-bg">
+<div class="auth-card">
+  <div class="text-center mb2">
+    <div class="brand-logo">🌾 DC<span>WMS</span></div>
+    <div style="font-size:1.05rem;font-weight:700;margin-top:.5rem">🛡️ Verify Warehouse Receipt</div>
+  </div>
+  <div class="form-group">
+    <label>Receipt Code</label>
+    <input class="form-control" id="pub-verify-input" placeholder="e.g. RC-A1B2C3D4" style="font-family:monospace;font-weight:700">
+  </div>
+  <button class="btn btn-primary btn-full" onclick="publicVerify()">Verify Receipt</button>
+  <div id="pub-verify-result" class="mt2"></div>
+  <div class="text-center mt3">
+    <a onclick="showScreen('screen-login')" style="font-size:.83rem;color:var(--g1);cursor:pointer">← Back to Login</a>
+  </div>
+</div>
+</div>
+</div>
+
+<!-- *** CONFIRM MODAL *** -->
+<div class="modal-overlay" id="confirm-modal">
+  <div class="modal-box">
+    <div class="modal-title" id="modal-title">Confirm Action</div>
+    <div id="modal-body" style="font-size:.9rem;color:var(--muted)"></div>
+    <div id="modal-extra" class="mt2"></div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+      <button class="btn" id="modal-confirm-btn" onclick="modalConfirm()">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// DCWMS PROTOTYPE - Complete Application Logic
+// ============================================================
+
+// ---- STATE ----
+let currentUser = null;
+let currentView = 'dashboard';
+let currentBookingWH = null;
+let currentInventoryRecord = null;
+let currentBookingDetail = null;
+let currentReceiptDetail = null;
+let currentWHDetail = null;
+let bookingFilter = '';
+let withdrawalFilter = '';
+let modalCallback = null;
+
+// ---- DEMO DATA ----
+const USERS = {
+  farmer_john: { id:1, username:'farmer_john', role:'farmer', firstName:'John', lastName:'Kamau', phone:'0712345678', county:'Nakuru', subCounty:'Bahati', nationalId:'12345678', email:'john@email.com' },
+  operator_wanjiku: { id:2, username:'operator_wanjiku', role:'operator', firstName:'Mary', lastName:'Wanjiku', phone:'0723456789', county:'Nakuru', subCounty:'Nakuru East', company:'Nakuru Grain Stores Ltd', nationalId:'23456789', email:'mary@ngs.co.ke' },
+  farmer_otieno: { id:3, username:'farmer_otieno', role:'farmer', firstName:'Peter', lastName:'Otieno', phone:'0734567890', county:'Kisumu', subCounty:'Kisumu East', nationalId:'34567890', email:'peter@email.com' },
+  admin: { id:4, username:'admin', role:'admin', firstName:'System', lastName:'Admin', phone:'0700000001', county:'Nairobi', subCounty:'Westlands', nationalId:'00000001', email:'admin@dcwms.ke' },
+};
+
+const WAREHOUSES = [
+  { id:1, operatorId:2, name:'Nakuru Grain Stores', county:'Nakuru', subCounty:'Bahati', village:'Kiamunyi', address:'Kiamunyi Road, Nakuru',
+    totalMT:500, availableMT:187.3, storageType:'bagged', certStatus:'wrsc', regNo:'WH-A1B2C3D4',
+    phone:'0723456789', email:'info@ngs.co.ke', rate:55, hasPest:true, hasMoisture:true, hasSecurity:true, hasFumig:false, acceptsWRS:true, isActive:true },
+  { id:2, operatorId:2, name:'Trans Nzoia Storage Co.', county:'Trans Nzoia', subCounty:'Kitale', village:'Town',address:'Kitale Industrial Area',
+    totalMT:1200, availableMT:843, storageType:'bulk', certStatus:'ncpb', regNo:'WH-B2C3D4E5',
+    phone:'0745678901', email:'info@tnsc.co.ke', rate:45, hasPest:true, hasMoisture:false, hasSecurity:true, hasFumig:true, acceptsWRS:true, isActive:true },
+  { id:3, operatorId:2, name:'Rift Valley Hermetic Hub', county:'Uasin Gishu', subCounty:'Eldoret East', village:'Huruma',address:'Eldoret-Malaba Road, Km 3',
+    totalMT:250, availableMT:112.5, storageType:'hermetic', certStatus:'both', regNo:'WH-C3D4E5F6',
+    phone:'0756789012', email:'info@rvhh.co.ke', rate:70, hasPest:true, hasMoisture:true, hasSecurity:true, hasFumig:true, acceptsWRS:true, isActive:true },
+  { id:4, operatorId:2, name:'Bungoma Farmers Coop Store', county:'Bungoma', subCounty:'Bungoma North', village:'',address:'Bungoma Market Road',
+    totalMT:350, availableMT:0, storageType:'bagged', certStatus:'wrsc', regNo:'WH-D4E5F6G7',
+    phone:'0767890123', email:'', rate:40, hasPest:true, hasMoisture:false, hasSecurity:false, hasFumig:false, acceptsWRS:false, isActive:true },
+  { id:5, operatorId:2, name:'Kitui County Grain Center', county:'Kitui', subCounty:'Kitui Central', village:'',address:'Kitui Town, Mwingi Road',
+    totalMT:180, availableMT:95, storageType:'bagged', certStatus:'pending', regNo:'WH-E5F6G7H8',
+    phone:'0778901234', email:'kgc@county.go.ke', rate:35, hasPest:true, hasMoisture:false, hasSecurity:true, hasFumig:false, acceptsWRS:false, isActive:true },
+];
+
+let bookings = [
+  { id:1, ref:'BK-11AA2233', farmerId:1, warehouseId:1, cereal:'maize', bags:100, mt:9.0, start:'2026-01-15', end:'2026-06-15', fee:27500, status:'approved', farmerNotes:'Clean dried maize', operatorNotes:'Approved - bay 3', createdAt:'2026-01-10', approvedAt:'2026-01-11' },
+  { id:2, ref:'BK-22BB3344', farmerId:3, warehouseId:1, cereal:'sorghum', bags:50, mt:4.5, start:'2026-02-01', end:'2026-05-01', fee:8250, status:'pending', farmerNotes:'', operatorNotes:'', createdAt:'2026-02-01' },
+  { id:3, ref:'BK-33CC4455', farmerId:1, warehouseId:2, cereal:'wheat', bags:200, mt:18.0, start:'2025-11-01', end:'2026-03-01', fee:36000, status:'completed', farmerNotes:'', operatorNotes:'Completed withdrawal', createdAt:'2025-10-28' },
+  { id:4, ref:'BK-44DD5566', farmerId:1, warehouseId:3, cereal:'millet', bags:30, mt:2.7, start:'2026-03-01', end:'2026-07-01', fee:8400, status:'rejected', farmerNotes:'', operatorNotes:'', rejectionReason:'Capacity reserved for cooperative', createdAt:'2026-02-20' },
+];
+let nextBookingId = 5;
+
+let receipts = [
+  { id:1, code:'RC-A1B2C3D4', bookingId:1, farmerId:1, warehouseId:1, cereal:'maize', bags:100, mt:9.0, start:'2026-01-15', end:'2026-06-15', fee:27500, issuedAt:'2026-01-11', issuedBy:2, hash:'a3f9b2c1d0e8f7a6b5c4d3e2f1a0b9c8d7e6f5a4b3c2d1e0f9a8b7c6d5e4f3a2' },
+];
+let nextReceiptId = 2;
+
+let inventoryRecords = [
+  { id:1, bookingId:1, warehouseId:1, farmerId:1, cereal:'maize', originalBags:100, originalMT:9.0, remainingBags:100, remainingMT:9.0, status:'stored', dateStored:'2026-01-11' },
+];
+let nextInvId = 2;
+
+let withdrawals = [
+  { id:1, ref:'WD-AA112233', farmerId:1, warehouseId:1, inventoryId:1, bookingId:1, bags:30, mt:2.7, scheduledDate:'2026-03-15', status:'completed', actualDate:'2026-03-15', farmerNotes:'Need for planting season', operatorNotes:'Completed', createdAt:'2026-03-10' },
+];
+let nextWdId = 2;
+
+// ---- HELPERS ----
+const getWH = id => WAREHOUSES.find(w => w.id === id);
+const getUser = id => Object.values(USERS).find(u => u.id === id);
+const formatDate = d => d ? new Date(d).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}) : '—';
+const formatKES = n => Number(n).toLocaleString();
+const certLabel = c => ({wrsc:'WRSC Certified',ncpb:'NCPB Certified',both:'NCPB & WRSC',pending:'Cert. Pending',none:'Not Certified'}[c]||c);
+const storageLabel = t => ({bagged:'Bagged',bulk:'Bulk',both:'Bulk & Bagged',hermetic:'Hermetic',cold:'Cold Storage'}[t]||t);
+const statusBadge = s => `<span class="badge badge-${s}">${{pending:'Pending',approved:'Approved',rejected:'Rejected',completed:'Completed',cancelled:'Cancelled',stored:'In Storage'}[s]||s}</span>`;
+const capClass = pct => pct > 85 ? 'cap-high' : pct > 60 ? 'cap-mid' : 'cap-low';
+const utilPct = wh => wh.totalMT > 0 ? Math.round((1 - wh.availableMT/wh.totalMT)*100) : 0;
+const availBags = wh => Math.floor(wh.availableMT * 1000 / 90);
+
+// ---- AUTH ----
+function doLogin() {
+  const u = document.getElementById('login-user').value.trim();
+  if (USERS[u]) {
+    currentUser = USERS[u];
+    initApp();
+    showScreen('screen-app');
+    navigate('dashboard');
+  } else {
+    alert('Invalid username. Try: farmer_john, operator_wanjiku, or admin');
+  }
+}
+function registerFarmer() { alert('✅ Demo: Account created!\nIn production this saves to PostgreSQL.'); showScreen('screen-login'); }
+function registerOperator() { alert('✅ Demo: Operator account created!\nIn production this saves to PostgreSQL.'); showScreen('screen-login'); }
+function doLogout() { currentUser = null; showScreen('screen-login'); }
+
+function initApp() {
+  document.getElementById('topbar-name').textContent = currentUser.firstName + ' ' + currentUser.lastName;
+  document.getElementById('topbar-role').textContent = {farmer:'Farmer',operator:'Operator',admin:'Admin'}[currentUser.role];
+  document.getElementById('sidebar-name').textContent = currentUser.firstName + ' ' + currentUser.lastName;
+  document.getElementById('sidebar-role').textContent = {farmer:'Farmer',operator:'Warehouse Operator',admin:'System Admin'}[currentUser.role];
+  document.getElementById('farmer-nav').style.display = (currentUser.role==='farmer'||currentUser.role==='admin') ? 'block' : 'none';
+  document.getElementById('operator-nav').style.display = (currentUser.role==='operator'||currentUser.role==='admin') ? 'block' : 'none';
+  updatePendingBadge();
+}
+
+function updatePendingBadge() {
+  const pending = bookings.filter(b => b.status==='pending' && (currentUser.role==='admin' || getWH(b.warehouseId)?.operatorId===currentUser.id)).length;
+  document.getElementById('pending-badge').textContent = pending;
+  document.getElementById('pending-badge').style.display = pending > 0 ? 'inline' : 'none';
+}
+
+// ---- NAVIGATION ----
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id)?.classList.add('active');
+}
+function navigate(view) {
+  currentView = view;
+  document.querySelectorAll('.page').forEach(p => p.style.display='none');
+  document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+  const pageMap = {
+    'dashboard':'page-dashboard','finder':'page-finder','book':'page-book',
+    'bookings':'page-bookings','booking-detail':'page-booking-detail',
+    'receipts':'page-receipts','receipt-detail':'page-receipt-detail',
+    'inventory':'page-inventory','withdrawals':'page-withdrawals',
+    'schedule-wd':'page-schedule-wd','my-warehouses':'page-my-warehouses',
+    'add-warehouse':'page-add-warehouse','wh-detail':'page-wh-detail',
+    'reports':'page-reports','verify-receipt':'page-verify-receipt','profile':'page-profile',
+  };
+  const pageId = pageMap[view];
+  if (pageId) { const el = document.getElementById(pageId); if(el) el.style.display='block'; }
+  const navMap = {'dashboard':'nav-dashboard','finder':'nav-finder','bookings':'nav-bookings',
+    'receipts':'nav-receipts','inventory':'nav-inventory','withdrawals':'nav-withdrawals',
+    'my-warehouses':'nav-my-warehouses','add-warehouse':'nav-add-warehouse',
+    'reports':'nav-reports','verify-receipt':'nav-verify','profile':'nav-profile'};
+  const navId = navMap[view];
+  if (navId) { const el = document.getElementById(navId); if(el) el.classList.add('active'); }
+  // Render page content
+  const renderMap = {
+    'dashboard':renderDashboard,'finder':renderFinder,'bookings':renderBookings,
+    'receipts':renderReceipts,'inventory':renderInventory,'withdrawals':renderWithdrawals,
+    'my-warehouses':renderMyWarehouses,'reports':renderReports,'profile':renderProfile,
+    'verify-receipt':() => { document.getElementById('verify-input').value=''; document.getElementById('verify-result').innerHTML=''; }
+  };
+  renderMap[view]?.();
+  closeSidebar();
+  window.scrollTo(0,0);
+}
+
+// ---- SIDEBAR MOBILE ----
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('sidebar-overlay').classList.toggle('open');
+}
+function closeSidebar() {
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sidebar-overlay').classList.remove('open');
+}
+
+// ---- DASHBOARD ----
+function renderDashboard() {
+  const u = currentUser;
+  document.getElementById('dash-greeting').textContent = `Welcome, ${u.firstName}! 👋`;
+  document.getElementById('dash-sub').textContent = {farmer:'Farmer Dashboard',operator:'Operator Dashboard',admin:'System Administrator Dashboard'}[u.role];
+  if (u.role==='farmer') renderFarmerDash();
+  else if (u.role==='operator') renderOperatorDash();
+  else renderAdminDash();
+}
+function renderFarmerDash() {
+  const myBooks = bookings.filter(b => b.farmerId===currentUser.id);
+  const pending = myBooks.filter(b=>b.status==='pending').length;
+  const active = myBooks.filter(b=>b.status==='approved').length;
+  document.getElementById('dash-action').innerHTML = `<button class="btn btn-primary" onclick="navigate('finder')">🔍 Find Warehouse</button>`;
+  document.getElementById('dash-stats').innerHTML = [
+    statCard('#d4edda','var(--g1)','📅',myBooks.length,'Total Bookings'),
+    statCard('#fff3cd','var(--amber2)','⏳',pending,'Pending'),
+    statCard('#d4edda','var(--g1)','📦',active,'Active Storage'),
+    statCard('#cce5ff','#004085','🧾',receipts.filter(r=>r.farmerId===currentUser.id).length,'Receipts'),
+  ].join('');
+  const recent = myBooks.slice(-5).reverse();
+  document.getElementById('dash-content').innerHTML = `
+    <div class="card">
+      <div class="card-header">📋 Recent Bookings <a onclick="navigate('bookings')" style="font-size:.8rem;color:var(--g1);cursor:pointer">View All →</a></div>
+      <div class="card-body p0">
+        ${recent.length ? `<div class="table-wrap"><table><thead><tr><th>Ref</th><th>Warehouse</th><th>Cereal</th><th>Bags</th><th>Status</th><th></th></tr></thead><tbody>
+          ${recent.map(b=>`<tr><td><span class="mono">${b.ref}</span></td><td>${getWH(b.warehouseId)?.name||'—'}</td><td class="capitalize">${b.cereal}</td><td>${b.bags}</td><td>${statusBadge(b.status)}</td><td><button class="btn btn-sm btn-secondary" onclick="viewBookingDetail(${b.id})">View</button></td></tr>`).join('')}
+        </tbody></table></div>` : '<div class="empty-state"><span class="e-icon">📋</span><h5>No bookings yet</h5><p><a onclick="navigate(\'finder\')" style="color:var(--g1);cursor:pointer">Find a warehouse</a> to get started</p></div>'}
+      </div>
+    </div>
+    <div class="grid-3 mt2">
+      <div class="card" style="cursor:pointer" onclick="navigate('finder')"><div class="card-body text-center" style="padding:1.5rem"><div style="font-size:2rem">🔍</div><div class="fw-bold text-green mt1">Find Warehouse</div><div class="text-muted" style="font-size:.78rem">Search certified storage near you</div></div></div>
+      <div class="card" style="cursor:pointer" onclick="navigate('inventory')"><div class="card-body text-center" style="padding:1.5rem"><div style="font-size:2rem">📦</div><div class="fw-bold mt1">My Storage</div><div class="text-muted" style="font-size:.78rem">View your stored grain</div></div></div>
+      <div class="card" style="cursor:pointer" onclick="navigate('verify-receipt')"><div class="card-body text-center" style="padding:1.5rem"><div style="font-size:2rem">🛡️</div><div class="fw-bold mt1">Verify Receipt</div><div class="text-muted" style="font-size:.78rem">Check digital receipt</div></div></div>
+    </div>`;
+}
+function renderOperatorDash() {
+  const myWHs = WAREHOUSES.filter(w => w.operatorId===currentUser.id);
+  const myBookings = bookings.filter(b => myWHs.some(w=>w.id===b.warehouseId));
+  const pendingB = myBookings.filter(b=>b.status==='pending').length;
+  const pendingW = withdrawals.filter(w => myWHs.some(wh=>wh.id===w.warehouseId) && w.status==='pending').length;
+  document.getElementById('dash-action').innerHTML = `<button class="btn btn-primary" onclick="navigate('add-warehouse')">➕ Add Warehouse</button>`;
+  document.getElementById('dash-stats').innerHTML = [
+    statCard('#d4edda','var(--g1)','🏭',myWHs.length,'Warehouses'),
+    statCard('#fff3cd','var(--amber2)','⏳',pendingB,'Pending Bookings'),
+    statCard('#d4edda','var(--g1)','✅',myBookings.filter(b=>b.status==='approved').length,'Active Bookings'),
+    statCard('#f8d7da','#721c24','📤',pendingW,'Pending Withdrawals'),
+  ].join('');
+  const capBlocks = myWHs.map(w=>{const p=utilPct(w);return`<div class="mb2"><div class="flex justify-between mb1"><span class="fw-bold" style="font-size:.9rem">${w.name}</span><span class="text-muted" style="font-size:.78rem">${p}% used · ${w.availableMT} MT free</span></div><div class="cap-bar"><div class="cap-fill ${capClass(p)}" style="width:${p}%"></div></div></div>`}).join('');
+  const recent = myBookings.slice(-8).reverse();
+  document.getElementById('dash-content').innerHTML = `
+    ${myWHs.length?`<div class="card mb2"><div class="card-header">🏭 Warehouse Utilization</div><div class="card-body">${capBlocks}</div></div>`:''}
+    <div class="card">
+      <div class="card-header">📋 Recent Booking Requests <button class="btn btn-sm btn-warning" onclick="filterBookings('pending');navigate('bookings')">Pending (${pendingB})</button></div>
+      <div class="card-body p0">
+        ${recent.length ? `<div class="table-wrap"><table><thead><tr><th>Ref</th><th>Farmer</th><th>Warehouse</th><th>Bags</th><th>Status</th><th></th></tr></thead><tbody>
+          ${recent.map(b=>`<tr><td class="mono" style="font-size:.82rem">${b.ref}</td><td>${getUser(b.farmerId)?.firstName||'—'} ${getUser(b.farmerId)?.lastName||''}</td><td>${getWH(b.warehouseId)?.name||'—'}</td><td>${b.bags}</td><td>${statusBadge(b.status)}</td><td><button class="btn btn-sm btn-secondary" onclick="viewBookingDetail(${b.id})">${b.status==='pending'?'Review':'View'}</button></td></tr>`).join('')}
+        </tbody></table></div>` : '<div class="empty-state"><span class="e-icon">📋</span><h5>No bookings yet</h5></div>'}
+      </div>
+    </div>`;
+}
+function renderAdminDash() {
+  document.getElementById('dash-stats').innerHTML = [
+    statCard('#d4edda','var(--g1)','🏭',WAREHOUSES.length,'Warehouses'),
+    statCard('#cce5ff','#004085','🌾',Object.values(USERS).filter(u=>u.role==='farmer').length,'Farmers'),
+    statCard('#fff3cd','var(--amber2)','⏳',bookings.filter(b=>b.status==='pending').length,'Pending Bookings'),
+    statCard('#d4edda','var(--g1)','📋',bookings.length,'Total Bookings'),
+  ].join('');
+  document.getElementById('dash-content').innerHTML = `<div class="card"><div class="card-header">All Recent Bookings</div><div class="card-body p0"><div class="table-wrap"><table><thead><tr><th>Ref</th><th>Farmer</th><th>Warehouse</th><th>Status</th><th></th></tr></thead><tbody>${bookings.slice(-10).reverse().map(b=>`<tr><td class="mono">${b.ref}</td><td>${getUser(b.farmerId)?.firstName||'?'}</td><td>${getWH(b.warehouseId)?.name||'?'}</td><td>${statusBadge(b.status)}</td><td><button class="btn btn-sm btn-secondary" onclick="viewBookingDetail(${b.id})">View</button></td></tr>`).join('')}</tbody></table></div></div></div>`;
+}
+function statCard(bg,color,icon,num,label) {
+  return `<div class="stat-card"><div class="s-top"><div></div><div class="s-icon" style="background:${bg};color:${color}">${icon}</div></div><div class="s-num" style="color:${color}">${num}</div><div class="s-label">${label}</div></div>`;
+}
+
+// ---- WAREHOUSE FINDER ----
+function renderFinder() {
+  filterWarehouses();
+}
+function filterWarehouses() {
+  const q = (document.getElementById('search-q')?.value||'').toLowerCase();
+  const county = document.getElementById('search-county')?.value||'';
+  const minCap = parseFloat(document.getElementById('search-cap')?.value||0)||0;
+  const certOnly = document.getElementById('search-cert')?.checked||false;
+  let results = WAREHOUSES.filter(w => w.isActive && w.availableMT > 0);
+  if (q) results = results.filter(w => w.name.toLowerCase().includes(q)||w.county.toLowerCase().includes(q)||w.subCounty.toLowerCase().includes(q));
+  if (county) results = results.filter(w => w.county===county);
+  if (minCap) results = results.filter(w => w.availableMT >= minCap);
+  if (certOnly) results = results.filter(w => !['pending','none'].includes(w.certStatus));
+  document.getElementById('finder-count').textContent = `${results.length} certified warehouse${results.length!==1?'s':''} found`;
+  const container = document.getElementById('wh-results');
+  container.innerHTML = results.length ? results.map(whCard).join('') : `<div class="empty-state" style="grid-column:1/-1"><span class="e-icon">🏭</span><h5>No warehouses found</h5><p>Try different search filters</p></div>`;
+}
+function whCard(w) {
+  const pct = utilPct(w);
+  const bags = availBags(w);
+  const certified = !['pending','none'].includes(w.certStatus);
+  const farmer = currentUser?.role==='farmer';
+  return `<div class="wh-card" onclick="viewWHDetail(${w.id})">
+    <div class="flex justify-between items-center mb1">
+      <div class="wh-name">${w.name}</div>
+      ${certified?'<span class="cert-tag">✓ Certified</span>':''}
+    </div>
+    <div class="wh-loc">📍 ${w.subCounty}, ${w.county}</div>
+    <div style="font-size:.78rem;margin-bottom:.35rem"><span class="flex justify-between"><span>Available</span><span style="font-weight:700;color:${pct>85?'var(--red)':pct>60?'var(--amber)':'var(--g1)'}">${w.availableMT} MT free</span></span></div>
+    <div class="cap-bar mb1"><div class="cap-fill ${capClass(pct)}" style="width:${pct}%"></div></div>
+    <div style="font-size:.73rem;color:var(--muted)">${pct}% full · ${bags} bags available</div>
+    <div class="wh-features">${w.hasPest?'<span class="wh-feat">🛡️ Pest Control</span>':''}${w.acceptsWRS?'<span class="wh-feat">🧾 WRS</span>':''}${w.hasSecurity?'<span class="wh-feat">🔒 Security</span>':''}${w.hasMoisture?'<span class="wh-feat">💧 Moisture</span>':''}</div>
+    <div style="font-size:.78rem;color:var(--muted);margin-bottom:.75rem">KES ${w.rate}/bag/month · ${storageLabel(w.storageType)}</div>
+    <div class="wh-actions">
+      <button class="btn btn-outline-muted btn-sm" onclick="event.stopPropagation();viewWHDetail(${w.id})">Details</button>
+      ${farmer?`<button class="btn btn-primary btn-sm" onclick="event.stopPropagation();startBooking(${w.id})">Book Space</button>`:''}
+    </div>
+  </div>`;
+}
+
+// ---- WAREHOUSE DETAIL ----
+function viewWHDetail(id) {
+  currentWHDetail = WAREHOUSES.find(w => w.id===id);
+  const w = currentWHDetail;
+  const pct = utilPct(w);
+  document.getElementById('whd-name').textContent = w.name;
+  document.getElementById('whd-loc').textContent = `📍 ${w.physical_address||w.address}, ${w.subCounty}, ${w.county}`;
+  document.getElementById('whd-actions').innerHTML = (currentUser.id===w.operatorId||currentUser.role==='admin') ?
+    `<button class="btn btn-secondary btn-sm" onclick="editWarehouse(${w.id})">✏️ Edit</button>` : '';
+  document.getElementById('whd-capacity').innerHTML = `
+    <div class="grid-3 text-center mb2">
+      <div style="background:#d4edda;border-radius:10px;padding:.9rem"><div style="font-size:1.3rem;font-weight:900;color:var(--g1)">${w.availableMT}</div><div style="font-size:.72rem;color:var(--muted)">MT Available</div></div>
+      <div style="background:#f0f4f0;border-radius:10px;padding:.9rem"><div style="font-size:1.3rem;font-weight:900">${w.totalMT}</div><div style="font-size:.72rem;color:var(--muted)">MT Total</div></div>
+      <div style="background:#fff3cd;border-radius:10px;padding:.9rem"><div style="font-size:1.3rem;font-weight:900;color:var(--amber2)">${pct}%</div><div style="font-size:.72rem;color:var(--muted)">Used</div></div>
+    </div>
+    <div class="cap-bar mb1" style="height:12px"><div class="cap-fill ${capClass(pct)}" style="width:${pct}%"></div></div>
+    <div class="grid-2 mt2" style="font-size:.85rem">
+      <div><span class="text-muted">Storage Type:</span> <b>${storageLabel(w.storageType)}</b></div>
+      <div><span class="text-muted">Certification:</span> <b>${certLabel(w.certStatus)}</b></div>
+      <div><span class="text-muted">Bags Available:</span> <b>${availBags(w)}</b></div>
+      <div><span class="text-muted">Rate:</span> <b>KES ${w.rate}/bag/mo</b></div>
+      <div><span class="text-muted">WRS:</span> <b class="${w.acceptsWRS?'text-green':''}">${w.acceptsWRS?'✓ Accepted':'Not accepted'}</b></div>
+      <div><span class="text-muted">Reg No:</span> <b class="mono" style="font-size:.78rem">${w.regNo}</b></div>
+    </div>`;
+  const feats = [{icon:'🛡️',label:'Pest Control',has:w.hasPest},{icon:'💧',label:'Moisture Control',has:w.hasMoisture},{icon:'🔒',label:'Security',has:w.hasSecurity},{icon:'💨',label:'Fumigation',has:w.hasFumig}];
+  document.getElementById('whd-features').innerHTML = `<div class="grid-2">${feats.map(f=>`<div class="flex items-center gap-sm p1" style="background:${f.has?'#f0f9f0':'#f8f8f8'};border-radius:8px;margin:.25rem 0"><div style="font-size:1.3rem">${f.icon}</div><div><div style="font-size:.82rem;font-weight:600">${f.label}</div><div style="font-size:.72rem;color:${f.has?'var(--g1)':'var(--muted)'}">${f.has?'✓ Available':'Not available'}</div></div></div>`).join('')}</div>`;
+  document.getElementById('whd-info').innerHTML = `<div class="fw-bold mb1">📞 Contact</div><div style="font-size:.88rem"><div class="mb1">📱 ${w.phone}</div>${w.email?`<div>✉️ ${w.email}</div>`:''}</div>`;
+  document.getElementById('whd-book-btn').innerHTML = (currentUser.role==='farmer' && w.availableMT > 0) ?
+    `<button class="btn btn-primary btn-full btn-lg mt2" onclick="startBooking(${w.id})">📋 Book Storage Now</button>` : '';
+  navigate('wh-detail');
+}
+
+// ---- BOOKING ----
+function startBooking(whId) {
+  const wh = WAREHOUSES.find(w => w.id===whId);
+  if (!wh || wh.availableMT <= 0) { alert('No capacity available.'); return; }
+  currentBookingWH = wh;
+  document.getElementById('book-wh-name').textContent = wh.name;
+  document.getElementById('book-wh-link').textContent = wh.name;
+  document.getElementById('book-avail-mt').textContent = wh.availableMT;
+  document.getElementById('book-avail-bags').textContent = availBags(wh);
+  document.getElementById('book-bags').max = availBags(wh);
+  document.getElementById('book-bags-hint').textContent = `Max: ${availBags(wh)} bags (${wh.availableMT} MT)`;
+  document.getElementById('book-bags').value = '';
+  document.getElementById('book-start').value = '';
+  document.getElementById('book-end').value = '';
+  document.getElementById('book-notes').value = '';
+  document.getElementById('fee-preview').style.display = 'none';
+  // Set min date
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById('book-start').min = today;
+  document.getElementById('book-end').min = today;
+  const wh2 = wh;
+  document.getElementById('book-wh-details').innerHTML = `
+    <div style="font-size:.82rem">
+      ${['Storage Type: '+storageLabel(wh2.storageType),'Certification: '+certLabel(wh2.certStatus),'Rate: KES '+wh2.rate+'/bag/month','WRS: '+(wh2.acceptsWRS?'✓ Accepted':'No'),'Contact: '+wh2.phone].map(l=>`<div class="r-row"><span class="r-label">${l.split(':')[0]}</span><span class="r-val">${l.split(':').slice(1).join(':').trim()}</span></div>`).join('')}
+    </div>`;
+  navigate('book');
+}
+function updateBookingCalc() {
+  const bags = parseInt(document.getElementById('book-bags').value)||0;
+  const start = document.getElementById('book-start').value;
+  const end = document.getElementById('book-end').value;
+  if (bags > 0 && start && end) {
+    const days = Math.max(0,(new Date(end)-new Date(start))/(1000*60*60*24));
+    if (days > 0) {
+      const months = Math.max(1, days/30);
+      const fee = bags * (currentBookingWH?.rate||50) * months;
+      document.getElementById('fee-preview').style.display = 'block';
+      document.getElementById('fee-amount').textContent = formatKES(Math.round(fee));
+      document.getElementById('fee-detail').textContent = `${bags} bags × KES ${currentBookingWH?.rate||50}/bag × ${months.toFixed(1)} months`;
+    }
+  }
+}
+function submitBooking() {
+  const bags = parseInt(document.getElementById('book-bags').value)||0;
+  const start = document.getElementById('book-start').value;
+  const end = document.getElementById('book-end').value;
+  if (!bags || !start || !end) { alert('Please fill all required fields.'); return; }
+  if (bags > availBags(currentBookingWH)) { alert(`Cannot exceed ${availBags(currentBookingWH)} available bags.`); return; }
+  if (new Date(end) <= new Date(start)) { alert('End date must be after start date.'); return; }
+  const days = (new Date(end)-new Date(start))/(1000*60*60*24);
+  const months = Math.max(1,days/30);
+  const fee = Math.round(bags * currentBookingWH.rate * months);
+  const ref = 'BK-' + Math.random().toString(36).substr(2,8).toUpperCase();
+  const booking = { id:nextBookingId++, ref, farmerId:currentUser.id, warehouseId:currentBookingWH.id, cereal:document.getElementById('book-cereal').value, bags, mt:+(bags*90/1000).toFixed(3), start, end, fee, status:'pending', farmerNotes:document.getElementById('book-notes').value, operatorNotes:'', createdAt:new Date().toISOString().split('T')[0] };
+  bookings.push(booking);
+  updatePendingBadge();
+  currentBookingDetail = booking;
+  alert(`✅ Booking ${ref} submitted!\nAwaiting warehouse operator approval.`);
+  viewBookingDetail(booking.id);
+}
+
+// ---- BOOKINGS LIST ----
+function renderBookings() {
+  const u = currentUser;
+  const isOp = u.role==='operator';
+  const isAdmin = u.role==='admin';
+  document.getElementById('blist-col2').textContent = isOp ? 'Farmer' : 'Warehouse';
+  document.getElementById('bookings-header-action').innerHTML = u.role==='farmer' ? `<button class="btn btn-primary" onclick="navigate('finder')">➕ New Booking</button>` : '';
+  filterBookings(bookingFilter);
+}
+function filterBookings(status) {
+  bookingFilter = status;
+  ['all','pending','approved','rejected','completed'].forEach(s => {
+    const el = document.getElementById(`bfilt-${s}`);
+    if(el) el.className = 'btn btn-sm ' + (s===status||(s==='all'&&!status)?'btn-primary':'btn-secondary');
+  });
+  let data = bookings;
+  if (currentUser.role==='farmer') data = data.filter(b=>b.farmerId===currentUser.id);
+  else if (currentUser.role==='operator') { const myWHs = WAREHOUSES.filter(w=>w.operatorId===currentUser.id).map(w=>w.id); data = data.filter(b=>myWHs.includes(b.warehouseId)); }
+  if (status) data = data.filter(b=>b.status===status);
+  const isOp = currentUser.role==='operator';
+  const tbody = document.getElementById('bookings-table');
+  tbody.innerHTML = data.length ? data.slice().reverse().map(b=>{
+    const wh = getWH(b.warehouseId); const farmer = getUser(b.farmerId);
+    return `<tr><td class="mono" style="font-size:.82rem">${b.ref}</td>
+      <td style="font-size:.87rem">${isOp?(farmer?.firstName+' '+farmer?.lastName):wh?.name||'—'}</td>
+      <td class="capitalize">${b.cereal}</td><td>${b.bags}</td>
+      <td style="font-size:.83rem">${formatDate(b.start)}</td>
+      <td>${formatKES(b.fee)}</td>
+      <td>${statusBadge(b.status)}</td>
+      <td><button class="btn btn-sm btn-secondary" onclick="viewBookingDetail(${b.id})">${isOp&&b.status==='pending'?'Review':'View'}</button></td></tr>`;
+  }).join('') : `<tr><td colspan="8"><div class="empty-state"><span class="e-icon">📋</span><h5>No bookings found</h5></div></td></tr>`;
+}
+
+// ---- BOOKING DETAIL ----
+function viewBookingDetail(id) {
+  const b = bookings.find(x=>x.id===id);
+  currentBookingDetail = b;
+  const wh = getWH(b.warehouseId); const farmer = getUser(b.farmerId);
+  document.getElementById('bd-title').textContent = `Booking ${b.ref}`;
+  document.getElementById('bd-status-badge').className = `badge badge-${b.status}`;
+  document.getElementById('bd-status-badge').textContent = {pending:'Pending Review',approved:'Approved',rejected:'Rejected',completed:'Completed',cancelled:'Cancelled'}[b.status]||b.status;
+  document.getElementById('bd-details').innerHTML = `
+    <div class="grid-2" style="font-size:.88rem">
+      <div><div class="text-muted" style="font-size:.72rem">REFERENCE</div><div class="fw-bold mono mt1">${b.ref}</div></div>
+      <div><div class="text-muted" style="font-size:.72rem">SUBMITTED</div><div class="fw-bold mt1">${formatDate(b.createdAt)}</div></div>
+      <div><div class="text-muted" style="font-size:.72rem">FARMER</div><div class="fw-bold mt1">${farmer?.firstName} ${farmer?.lastName}</div><div class="text-muted" style="font-size:.75rem">${farmer?.phone} · ${farmer?.county}</div></div>
+      <div><div class="text-muted" style="font-size:.72rem">WAREHOUSE</div><div class="fw-bold mt1">${wh?.name}</div><div class="text-muted" style="font-size:.75rem">${wh?.subCounty}, ${wh?.county}</div></div>
+      <div><div class="text-muted" style="font-size:.72rem">CEREAL</div><div class="fw-bold capitalize mt1">${b.cereal}</div></div>
+      <div><div class="text-muted" style="font-size:.72rem">QUANTITY</div><div class="fw-bold mt1">${b.bags} bags <span class="text-muted">(${b.mt} MT)</span></div></div>
+      <div><div class="text-muted" style="font-size:.72rem">STORAGE START</div><div class="fw-bold mt1">${formatDate(b.start)}</div></div>
+      <div><div class="text-muted" style="font-size:.72px">STORAGE END</div><div class="fw-bold mt1">${formatDate(b.end)}</div></div>
+      <div><div class="text-muted" style="font-size:.72rem">EST. FEE</div><div class="fw-bold text-green mt1">KES ${formatKES(b.fee)}</div></div>
+    </div>
+    ${b.farmerNotes?`<div class="mt2 p1" style="background:#f0f4f0;border-radius:8px"><div class="text-muted" style="font-size:.72rem">FARMER NOTES</div><div class="mt1">${b.farmerNotes}</div></div>`:''}
+    ${b.operatorNotes?`<div class="mt1 p1" style="background:#fff3cd;border-radius:8px"><div class="text-muted" style="font-size:.72rem">OPERATOR NOTES</div><div class="mt1">${b.operatorNotes}</div></div>`:''}
+    ${b.rejectionReason?`<div class="mt1 p1" style="background:#f8d7da;border-radius:8px"><div class="text-muted" style="font-size:.72rem">REJECTION REASON</div><div class="mt1">${b.rejectionReason}</div></div>`:''}`;
+  // Operator actions
+  let actionsHTML = '';
+  if ((currentUser.role==='operator'||currentUser.role==='admin') && b.status==='pending') {
+    actionsHTML = `<div class="card" style="border-color:var(--amber)"><div class="card-header" style="background:#fff3cd">⚠️ Review Booking</div><div class="card-body">
+      <textarea id="op-notes" class="form-control mb2" placeholder="Operator notes (optional)..." rows="2"></textarea>
+      <div class="flex gap-md">
+        <button class="btn btn-primary flex-1" onclick="approveBooking(${b.id})">✅ Approve</button>
+        <button class="btn btn-danger flex-1" onclick="showRejectModal(${b.id})">❌ Reject</button>
+      </div></div></div>`;
+  } else if (currentUser.role==='farmer' && b.status==='pending') {
+    actionsHTML = `<button class="btn btn-outline-muted btn-full" onclick="cancelBooking(${b.id})">Cancel Booking</button>`;
+  }
+  document.getElementById('bd-actions').innerHTML = actionsHTML;
+  // Receipt panel
+  const receipt = receipts.find(r=>r.bookingId===b.id);
+  document.getElementById('bd-receipt-panel').innerHTML = b.status==='approved'&&receipt ? `<div class="card mb2" style="border-color:var(--g1)"><div class="card-body text-center"><div style="font-size:1.8rem">🧾</div><div class="fw-bold text-green">Digital Receipt Issued</div><div class="text-muted mb2" style="font-size:.82rem">Your e-WRS receipt is ready</div><button class="btn btn-primary btn-full btn-sm mb1" onclick="viewReceiptDetail(${receipt.id})">View Receipt</button><button class="btn btn-outline-muted btn-full btn-sm" onclick="printReceipt()">🖨️ Print</button></div></div>` : '';
+  const inv = inventoryRecords.find(r=>r.bookingId===b.id);
+  document.getElementById('bd-storage-panel').innerHTML = b.status==='approved'&&inv&&currentUser.role==='farmer' ? `<div class="card mb2"><div class="card-body"><div class="fw-bold mb1">📦 Storage Actions</div><button class="btn btn-outline-muted btn-full btn-sm mb1" onclick="viewInventoryDetail(${inv.id})">View Inventory</button><button class="btn btn-warning btn-full btn-sm" onclick="startWithdrawal(${inv.id})">📤 Schedule Withdrawal</button></div></div>` : '';
+  document.getElementById('bd-contact').innerHTML = `<div class="mb1">📱 ${wh?.phone}</div>${wh?.email?`<div>✉️ ${wh.email}</div>`:''}`;
+  navigate('booking-detail');
+}
+function approveBooking(id) {
+  const b = bookings.find(x=>x.id===id);
+  const wh = getWH(b.warehouseId);
+  const notes = document.getElementById('op-notes')?.value||'';
+  if (b.mt > wh.availableMT) { alert('Insufficient capacity!'); return; }
+  b.status = 'approved'; b.operatorNotes = notes; b.approvedAt = new Date().toISOString().split('T')[0];
+  // Update warehouse capacity
+  wh.availableMT = +(wh.availableMT - b.mt).toFixed(3);
+  // Create inventory record
+  const inv = { id:nextInvId++, bookingId:b.id, warehouseId:wh.id, farmerId:b.farmerId, cereal:b.cereal, originalBags:b.bags, originalMT:b.mt, remainingBags:b.bags, remainingMT:b.mt, status:'stored', dateStored:new Date().toISOString().split('T')[0] };
+  inventoryRecords.push(inv);
+  // Create receipt
+  const rcCode = 'RC-' + Math.random().toString(36).substr(2,8).toUpperCase();
+  const rc = { id:nextReceiptId++, code:rcCode, bookingId:b.id, farmerId:b.farmerId, warehouseId:wh.id, cereal:b.cereal, bags:b.bags, mt:b.mt, start:b.start, end:b.end, fee:b.fee, issuedAt:new Date().toISOString().split('T')[0], issuedBy:currentUser.id, hash:Array.from({length:64},()=>'0123456789abcdef'[Math.floor(Math.random()*16)]).join(''), isValid:true };
+  receipts.push(rc);
+  updatePendingBadge();
+  alert(`✅ Booking approved!\nReceipt ${rcCode} issued.\nInventory updated.`);
+  viewBookingDetail(id);
+}
+function showRejectModal(id) {
+  document.getElementById('modal-title').textContent = 'Reject Booking';
+  document.getElementById('modal-body').textContent = 'This will reject the booking request. Please provide a reason.';
+  document.getElementById('modal-extra').innerHTML = `<textarea id="reject-reason" class="form-control" rows="2" placeholder="Rejection reason *"></textarea>`;
+  document.getElementById('modal-confirm-btn').className = 'btn btn-danger';
+  document.getElementById('modal-confirm-btn').textContent = 'Reject Booking';
+  modalCallback = () => {
+    const reason = document.getElementById('reject-reason')?.value||'';
+    const b = bookings.find(x=>x.id===id);
+    b.status='rejected'; b.rejectionReason=reason;
+    updatePendingBadge(); closeModal(); viewBookingDetail(id);
+  };
+  document.getElementById('confirm-modal').classList.add('open');
+}
+function cancelBooking(id) {
+  if (confirm('Cancel this booking?')) { bookings.find(b=>b.id===id).status='cancelled'; viewBookingDetail(id); }
+}
+
+// ---- RECEIPTS ----
+function renderReceipts() {
+  const u = currentUser;
+  let data = u.role==='farmer' ? receipts.filter(r=>r.farmerId===u.id) : u.role==='operator' ? receipts.filter(r=>getWH(r.warehouseId)?.operatorId===u.id) : receipts;
+  const tbody = document.getElementById('receipts-table');
+  tbody.innerHTML = data.length ? data.slice().reverse().map(r=>`<tr>
+    <td class="mono fw-bold" style="font-size:.85rem">${r.code}</td>
+    <td>${getWH(r.warehouseId)?.name||'—'}</td><td class="capitalize">${r.cereal}</td><td>${r.bags}</td>
+    <td>${formatDate(r.issuedAt)}</td>
+    <td><span class="badge badge-${r.isValid?'valid':'cancelled'}">${r.isValid?'Valid':'Voided'}</span></td>
+    <td><button class="btn btn-sm btn-secondary" onclick="viewReceiptDetail(${r.id})">View</button></td></tr>`).join('')
+  : `<tr><td colspan="7"><div class="empty-state"><span class="e-icon">🧾</span><h5>No receipts yet</h5><p>Receipts are issued when a booking is approved</p></div></td></tr>`;
+}
+function viewReceiptDetail(id) {
+  currentReceiptDetail = receipts.find(r=>r.id===id);
+  const r = currentReceiptDetail;
+  const wh = getWH(r.warehouseId); const farmer = getUser(r.farmerId);
+  document.getElementById('receipt-code-display').value = r.code;
+  document.getElementById('receipt-display').innerHTML = `<div class="receipt-card">
+    <div class="receipt-head"><div style="font-size:2rem">🌾</div><div style="font-size:1.1rem;font-weight:800;margin:.4rem 0">DIGITAL WAREHOUSE RECEIPT</div><div style="font-size:.8rem;opacity:.8">Kenya Warehouse Receipt System (e-WRS)</div><div class="r-code">${r.code}</div><div style="margin-top:.5rem;font-size:.75rem">✅ VALID & VERIFIED</div></div>
+    <div class="receipt-body">
+      <div class="r-section">Depositor Details</div>
+      <div class="r-row"><span class="r-label">Full Name</span><span class="r-val">${farmer?.firstName} ${farmer?.lastName}</span></div>
+      <div class="r-row"><span class="r-label">ID / Phone</span><span class="r-val">${farmer?.nationalId||'—'} / ${farmer?.phone}</span></div>
+      <div class="r-row"><span class="r-label">County</span><span class="r-val">${farmer?.county}, ${farmer?.subCounty}</span></div>
+      <div class="r-section">Warehouse Details</div>
+      <div class="r-row"><span class="r-label">Warehouse</span><span class="r-val">${wh?.name}</span></div>
+      <div class="r-row"><span class="r-label">Location</span><span class="r-val">${wh?.subCounty}, ${wh?.county}</span></div>
+      <div class="r-row"><span class="r-label">Reg. Number</span><span class="r-val mono" style="font-size:.78rem">${wh?.regNo}</span></div>
+      <div class="r-row"><span class="r-label">Certification</span><span class="r-val">${certLabel(wh?.certStatus||'')}</span></div>
+      <div class="r-section">Commodity Details</div>
+      <div class="r-row"><span class="r-label">Cereal Type</span><span class="r-val capitalize">${r.cereal}</span></div>
+      <div class="r-row"><span class="r-label">Quantity</span><span class="r-val">${r.bags} bags (90kg each)</span></div>
+      <div class="r-row"><span class="r-label">Weight (MT)</span><span class="r-val">${r.mt} MT</span></div>
+      <div class="r-row"><span class="r-label">Storage Period</span><span class="r-val">${formatDate(r.start)} – ${formatDate(r.end)}</span></div>
+      <div class="r-row"><span class="r-label">Estimated Fee</span><span class="r-val text-green">KES ${formatKES(r.fee)}</span></div>
+      <div class="r-section">Verification</div>
+      <div class="r-row"><span class="r-label">Receipt No.</span><span class="r-val mono">${r.code}</span></div>
+      <div class="r-row"><span class="r-label">Issued On</span><span class="r-val">${formatDate(r.issuedAt)}</span></div>
+      <div class="r-row"><span class="r-label">Booking Ref</span><span class="r-val mono">${bookings.find(b=>b.id===r.bookingId)?.ref||'—'}</span></div>
+      <div class="r-hash"><span style="font-size:.68rem;font-weight:700;color:var(--muted)">SHA-256 HASH:</span><br>${r.hash}</div>
+    </div>
+  </div>`;
+  const inv = inventoryRecords.find(x=>x.bookingId===r.bookingId);
+  document.getElementById('receipt-actions-panel').innerHTML = currentUser.role==='farmer'&&inv ? `<div class="card-body"><div class="fw-bold mb2">Actions</div>${inv.remainingBags>0?`<button class="btn btn-warning btn-full btn-sm mb1" onclick="startWithdrawal(${inv.id})">📤 Schedule Withdrawal</button>`:''}<button class="btn btn-outline-muted btn-full btn-sm" onclick="printReceipt()">🖨️ Print Receipt</button></div>` : '<div class="card-body"></div>';
+  navigate('receipt-detail');
+}
+function copyReceiptCode() {
+  if(currentReceiptDetail) { navigator.clipboard?.writeText(currentReceiptDetail.code).catch(()=>{}); alert(`Code copied: ${currentReceiptDetail.code}`); }
+}
+function printReceipt() { alert('🖨️ In production this opens a print-ready PDF view.\nReceipt: ' + (currentReceiptDetail?.code||'')); }
+
+// ---- INVENTORY ----
+function renderInventory() {
+  const u = currentUser;
+  let data = u.role==='farmer' ? inventoryRecords.filter(r=>r.farmerId===u.id) : u.role==='operator' ? inventoryRecords.filter(r=>getWH(r.warehouseId)?.operatorId===u.id) : inventoryRecords;
+  const tbody = document.getElementById('inventory-table');
+  tbody.innerHTML = data.length ? data.slice().reverse().map(r=>{
+    const wh=getWH(r.warehouseId); const farmer=getUser(r.farmerId);
+    return `<tr><td style="font-size:.87rem"><div class="fw-bold">${wh?.name||'—'}</div><div class="text-muted" style="font-size:.75rem">${wh?.county}</div></td>
+      <td>${farmer?.firstName} ${farmer?.lastName}</td><td class="capitalize">${r.cereal}</td>
+      <td>${r.originalBags} bags</td>
+      <td><div class="fw-bold" style="color:var(--g1)">${r.remainingBags} bags</div><div class="text-muted" style="font-size:.75rem">${r.remainingMT} MT</div></td>
+      <td>${statusBadge(r.status)}</td><td style="font-size:.83rem">${formatDate(r.dateStored)}</td>
+      <td class="flex gap-sm"><button class="btn btn-sm btn-secondary" onclick="viewInventoryDetail(${r.id})">View</button>${u.role==='farmer'&&r.remainingBags>0?`<button class="btn btn-sm btn-warning" onclick="startWithdrawal(${r.id})">Withdraw</button>`:''}</td></tr>`;
+  }).join('') : `<tr><td colspan="8"><div class="empty-state"><span class="e-icon">📦</span><h5>No inventory records</h5><p>Inventory is created when a booking is approved</p></div></td></tr>`;
+}
+function viewInventoryDetail(id) {
+  // Navigate to inventory, highlight record
+  navigate('inventory');
+}
+
+// ---- WITHDRAWALS ----
+function renderWithdrawals() {
+  filterWithdrawals(withdrawalFilter);
+}
+function filterWithdrawals(status) {
+  withdrawalFilter = status;
+  const u = currentUser;
+  let data = u.role==='farmer' ? withdrawals.filter(w=>w.farmerId===u.id) : u.role==='operator' ? withdrawals.filter(w=>getWH(w.warehouseId)?.operatorId===u.id) : withdrawals;
+  if(status) data = data.filter(w=>w.status===status);
+  const tbody = document.getElementById('withdrawals-table');
+  const isOp = u.role==='operator'||u.role==='admin';
+  tbody.innerHTML = data.length ? data.slice().reverse().map(w=>{
+    const wh=getWH(w.warehouseId); const farmer=getUser(w.farmerId);
+    return `<tr><td class="mono" style="font-size:.82rem">${w.ref}</td><td>${farmer?.firstName} ${farmer?.lastName}</td><td>${wh?.name||'—'}</td><td>${w.bags}</td><td style="font-size:.83rem">${formatDate(w.scheduledDate)}</td><td>${statusBadge(w.status)}</td>
+      <td><button class="btn btn-sm btn-secondary" onclick="viewWithdrawalDetail(${w.id})">${isOp&&w.status==='pending'?'Process':'View'}</button></td></tr>`;
+  }).join('') : `<tr><td colspan="7"><div class="empty-state"><span class="e-icon">📤</span><h5>No withdrawals found</h5></div></td></tr>`;
+}
+function startWithdrawal(inventoryId) {
+  currentInventoryRecord = inventoryRecords.find(r=>r.id===inventoryId);
+  const r = currentInventoryRecord;
+  const wh = getWH(r.warehouseId);
+  document.getElementById('wd-bags').max = r.remainingBags;
+  document.getElementById('wd-bags').value = '';
+  document.getElementById('wd-bags-hint').textContent = `Max: ${r.remainingBags} bags remaining`;
+  document.getElementById('wd-date').value = '';
+  document.getElementById('wd-date').min = new Date().toISOString().split('T')[0];
+  document.getElementById('wd-notes').value = '';
+  document.getElementById('wd-calc').style.display = 'none';
+  document.getElementById('wd-inventory-summary').innerHTML = `
+    <div class="r-row"><span class="r-label">Warehouse</span><span class="r-val">${wh?.name}</span></div>
+    <div class="r-row"><span class="r-label">Cereal</span><span class="r-val capitalize">${r.cereal}</span></div>
+    <div class="r-row"><span class="r-label">Original Bags</span><span class="r-val">${r.originalBags}</span></div>
+    <div class="r-row"><span class="r-label">Remaining</span><span class="r-val" style="color:var(--g1);font-size:1.1rem;font-weight:800">${r.remainingBags} bags</span></div>
+    <div style="background:#d4edda;border-radius:9px;padding:.75rem;text-align:center;margin-top:.75rem">
+      <div style="font-size:.72rem;color:var(--muted)">Available to Withdraw</div>
+      <div style="font-size:1.4rem;font-weight:900;color:var(--g1)">${r.remainingBags}</div>
+      <div style="font-size:.72rem;color:var(--muted)">bags (${r.remainingMT} MT)</div>
+    </div>`;
+  navigate('schedule-wd');
+}
+function updateWdCalc() {
+  const bags = parseInt(document.getElementById('wd-bags').value)||0;
+  const max = currentInventoryRecord?.remainingBags||0;
+  if (bags > 0 && bags <= max) {
+    const mt = (bags*90/1000).toFixed(3);
+    document.getElementById('wd-calc').style.display = 'flex';
+    document.getElementById('wd-calc').innerHTML = `📦 Withdrawing <b>${bags} bags</b> = <b>${mt} MT</b>. Remaining after: <b>${max-bags} bags</b>`;
+  } else { document.getElementById('wd-calc').style.display='none'; }
+}
+function submitWithdrawal() {
+  const bags = parseInt(document.getElementById('wd-bags').value)||0;
+  const date = document.getElementById('wd-date').value;
+  const r = currentInventoryRecord;
+  if (!bags||!date) { alert('Please fill all required fields.'); return; }
+  if (bags > r.remainingBags) { alert(`Cannot withdraw more than ${r.remainingBags} bags.`); return; }
+  const ref = 'WD-' + Math.random().toString(36).substr(2,8).toUpperCase();
+  const wd = { id:nextWdId++, ref, farmerId:currentUser.id, warehouseId:r.warehouseId, inventoryId:r.id, bookingId:r.bookingId, bags, mt:+(bags*90/1000).toFixed(3), scheduledDate:date, status:'pending', farmerNotes:document.getElementById('wd-notes').value, operatorNotes:'', createdAt:new Date().toISOString().split('T')[0] };
+  withdrawals.push(wd);
+  alert(`✅ Withdrawal ${ref} scheduled for ${formatDate(date)}.\nAwaiting operator approval.`);
+  navigate('withdrawals');
+}
+function viewWithdrawalDetail(id) {
+  const wd = withdrawals.find(w=>w.id===id);
+  if (!wd) return;
+  if ((currentUser.role==='operator'||currentUser.role==='admin') && (wd.status==='pending'||wd.status==='approved')) {
+    showWithdrawalActionModal(wd);
+  } else {
+    const wh=getWH(wd.warehouseId), farmer=getUser(wd.farmerId);
+    alert(`Withdrawal: ${wd.ref}\nFarmer: ${farmer?.firstName} ${farmer?.lastName}\nWarehouse: ${wh?.name}\nBags: ${wd.bags}\nScheduled: ${formatDate(wd.scheduledDate)}\nStatus: ${wd.status.toUpperCase()}`);
+  }
+}
+function showWithdrawalActionModal(wd) {
+  const inv = inventoryRecords.find(r=>r.id===wd.inventoryId);
+  document.getElementById('modal-title').textContent = `Process Withdrawal ${wd.ref}`;
+  document.getElementById('modal-body').textContent = `Farmer: ${getUser(wd.farmerId)?.firstName} | Bags: ${wd.bags} | Scheduled: ${formatDate(wd.scheduledDate)}`;
+  document.getElementById('modal-extra').innerHTML = `<textarea id="op-wd-notes" class="form-control mb2" rows="2" placeholder="Operator notes..."></textarea>
+    <div class="flex gap-sm">
+      ${wd.status==='pending'?`<button class="btn btn-primary flex-1" onclick="processWithdrawal(${wd.id},'approve')">✅ Approve</button>`:''}
+      ${wd.status==='approved'?`<button class="btn btn-primary flex-1" onclick="processWithdrawal(${wd.id},'complete')">✅ Mark Complete</button>`:''}
+      <button class="btn btn-danger flex-1" onclick="processWithdrawal(${wd.id},'reject')">❌ Reject</button>
+    </div>`;
+  document.getElementById('modal-confirm-btn').style.display='none';
+  modalCallback = null;
+  document.getElementById('confirm-modal').classList.add('open');
+}
+function processWithdrawal(id, action) {
+  const wd = withdrawals.find(w=>w.id===id);
+  const notes = document.getElementById('op-wd-notes')?.value||'';
+  const inv = inventoryRecords.find(r=>r.id===wd.inventoryId);
+  const wh = getWH(wd.warehouseId);
+  if(action==='approve') { wd.status='approved'; wd.operatorNotes=notes; alert(`✅ Withdrawal ${wd.ref} approved.`); }
+  else if(action==='complete') {
+    inv.remainingBags -= wd.bags; inv.remainingMT = +(inv.remainingMT - wd.mt).toFixed(3);
+    if(inv.remainingBags===0) inv.status='fully_withdrawn'; else inv.status='partial_withdrawn';
+    wh.availableMT = +(wh.availableMT + wd.mt).toFixed(3);
+    wd.status='completed'; wd.actualDate=new Date().toISOString().split('T')[0]; wd.operatorNotes=notes;
+    alert(`✅ Withdrawal completed!\nInventory updated.\nWarehouse capacity restored: ${wh.availableMT} MT available.`);
+  }
+  else if(action==='reject') { wd.status='rejected'; wd.rejectionReason=notes; }
+  closeModal();
+  renderWithdrawals();
+}
+
+// ---- MY WAREHOUSES ----
+function renderMyWarehouses() {
+  const myWHs = WAREHOUSES.filter(w=>w.operatorId===currentUser.id||currentUser.role==='admin');
+  document.getElementById('my-wh-grid').innerHTML = myWHs.length ? myWHs.map(w=>{
+    const p=utilPct(w);
+    return `<div class="wh-card" onclick="viewWHDetail(${w.id})">
+      <div class="flex justify-between items-center mb1"><div class="wh-name">${w.name}</div><span class="badge badge-${w.isActive?'active':'inactive'}">${w.isActive?'Active':'Inactive'}</span></div>
+      <div class="wh-loc">📍 ${w.subCounty}, ${w.county}</div>
+      <div class="flex justify-between mb1" style="font-size:.78rem"><span>Utilization</span><span class="fw-bold">${p}%</span></div>
+      <div class="cap-bar mb1"><div class="cap-fill ${capClass(p)}" style="width:${p}%"></div></div>
+      <div class="grid-3 text-center mt1 mb2" style="font-size:.72rem;gap:.4rem">
+        <div style="background:#d4edda;border-radius:7px;padding:.4rem"><div class="fw-bold text-green">${w.availableMT}</div><div class="text-muted">MT Free</div></div>
+        <div style="background:#f0f4f0;border-radius:7px;padding:.4rem"><div class="fw-bold">${w.totalMT}</div><div class="text-muted">MT Total</div></div>
+        <div style="background:#fff3cd;border-radius:7px;padding:.4rem"><div class="fw-bold" style="color:var(--amber2)">${availBags(w)}</div><div class="text-muted">Bags</div></div>
+      </div>
+      <div class="flex gap-sm">
+        <button class="btn btn-outline-muted btn-sm flex-1" onclick="event.stopPropagation();editWarehouse(${w.id})">✏️ Edit</button>
+        <button class="btn btn-primary btn-sm flex-1" onclick="event.stopPropagation();viewWHDetail(${w.id})">View</button>
+      </div>
+    </div>`;
+  }).join('') : `<div class="empty-state" style="grid-column:1/-1"><span class="e-icon">🏭</span><h5>No warehouses yet</h5><p>Add your first warehouse to start accepting bookings</p><button class="btn btn-primary mt2" onclick="navigate('add-warehouse')">Add Warehouse</button></div>`;
+}
+function editWarehouse(id) {
+  const w = WAREHOUSES.find(x=>x.id===id);
+  if(!w) return;
+  document.getElementById('add-wh-title').textContent = '✏️ Edit Warehouse';
+  document.getElementById('wh-name').value = w.name;
+  document.getElementById('wh-phone').value = w.phone;
+  document.getElementById('wh-email').value = w.email||'';
+  document.getElementById('wh-address').value = w.address;
+  document.getElementById('wh-county').value = w.county;
+  document.getElementById('wh-sub-county').value = w.subCounty;
+  document.getElementById('wh-capacity').value = w.totalMT;
+  document.getElementById('wh-rate').value = w.rate;
+  document.getElementById('wh-storage-type').value = w.storageType;
+  document.getElementById('wh-cert').value = w.certStatus;
+  document.getElementById('wh-pest').checked = w.hasPest;
+  document.getElementById('wh-moisture').checked = w.hasMoisture;
+  document.getElementById('wh-security').checked = w.hasSecurity;
+  document.getElementById('wh-fumigation').checked = w.hasFumig;
+  document.getElementById('wh-wrs').checked = w.acceptsWRS;
+  navigate('add-warehouse');
+}
+function saveWarehouse() {
+  const name = document.getElementById('wh-name').value.trim();
+  const cap = parseFloat(document.getElementById('wh-capacity').value)||0;
+  if(!name||!cap) { alert('Please fill required fields (name, capacity).'); return; }
+  // In demo we just show success
+  alert(`✅ Warehouse "${name}" saved!\nCapacity: ${cap} MT\nIn production this saves to PostgreSQL.`);
+  document.getElementById('add-wh-title').textContent = '🏭 Add Warehouse';
+  navigate('my-warehouses');
+}
+
+// ---- REPORTS ----
+function renderReports() {
+  const u = currentUser;
+  let html = '';
+  if(u.role==='operator'||u.role==='admin') {
+    const myWHs = WAREHOUSES.filter(w=>u.role==='admin'||w.operatorId===u.id);
+    const myBookings = bookings.filter(b=>myWHs.some(w=>w.id===b.warehouseId));
+    const stored = inventoryRecords.filter(r=>myWHs.some(w=>w.id===r.warehouseId)&&r.status==='stored');
+    const totalStored = stored.reduce((s,r)=>s+r.remainingMT,0);
+    // Cereal breakdown
+    const bycereal = {};
+    stored.forEach(r=>{ bycereal[r.cereal]=(bycereal[r.cereal]||{bags:0,mt:0}); bycereal[r.cereal].bags+=r.remainingBags; bycereal[r.cereal].mt+=r.remainingMT; });
+    html += `<div class="stats-grid mb3">
+      ${statCard('#d4edda','var(--g1)','🏭',myWHs.length,'Warehouses')}
+      ${statCard('#fff3cd','var(--amber2)','📋',myBookings.length,'Total Bookings')}
+      ${statCard('#d4edda','var(--g1)','📦',totalStored.toFixed(1)+' MT','Currently Stored')}
+      ${statCard('#f8d7da','#721c24','📤',withdrawals.filter(w=>myWHs.some(wh=>wh.id===w.warehouseId)&&w.status==='pending').length,'Pending Withdrawals')}
+    </div>`;
+    html += `<div class="grid-2 mb3 gap-lg">
+      <div class="card"><div class="card-header">🏭 Warehouse Utilization</div><div class="card-body">`;
+    myWHs.forEach(w=>{
+      const p=utilPct(w);
+      html+=`<div class="mb2"><div class="flex justify-between mb1"><span class="fw-bold" style="font-size:.88rem">${w.name}</span><span class="text-muted" style="font-size:.75rem">${w.county} · ${p}%</span></div>
+        <div class="cap-bar" style="height:10px"><div class="cap-fill ${capClass(p)}" style="width:${p}%"></div></div>
+        <div class="flex justify-between mt1" style="font-size:.75rem"><span class="text-muted">Used: ${(w.totalMT-w.availableMT).toFixed(1)} MT</span><span class="text-muted">Free: ${w.availableMT} MT</span></div></div>`;
+    });
+    html += `</div></div>
+      <div class="card"><div class="card-header">🌾 Cereal Breakdown</div><div class="card-body">
+        ${Object.keys(bycereal).length ? Object.entries(bycereal).sort((a,b)=>b[1].bags-a[1].bags).map(([c,d])=>`
+          <div class="flex justify-between items-center mb2" style="background:#f0f9f0;border-radius:8px;padding:.6rem">
+            <span class="capitalize fw-bold">${c}</span>
+            <div class="text-right"><div class="fw-bold text-green">${d.bags} bags</div><div class="text-muted" style="font-size:.75rem">${d.mt.toFixed(2)} MT</div></div>
+          </div>`).join('') : '<div class="text-muted text-center p1">No inventory data</div>'}
+      </div></div>
+    </div>`;
+    html += `<div class="card"><div class="card-header">📋 Booking Summary (Last 30 Days)</div><div class="card-body"><div class="flex gap-md flex-wrap">`;
+    ['pending','approved','rejected','completed'].forEach(s=>{
+      const cnt=myBookings.filter(b=>b.status===s).length;
+      html+=`<div style="background:#f0f4f0;border-radius:10px;padding:.75rem 1.25rem;text-align:center"><div style="font-size:1.3rem;font-weight:900;color:var(--g1)">${cnt}</div><div class="text-muted" style="font-size:.75rem;text-transform:capitalize">${s}</div></div>`;
+    });
+    html+=`</div></div></div>`;
+  }
+  if(u.role==='farmer') {
+    const myB=bookings.filter(b=>b.farmerId===u.id);
+    const myI=inventoryRecords.filter(r=>r.farmerId===u.id&&r.status==='stored');
+    const myW=withdrawals.filter(w=>w.farmerId===u.id&&w.status==='completed');
+    html+=`<div class="stats-grid mb3">
+      ${statCard('#d4edda','var(--g1)','📋',myB.length,'Total Bookings')}
+      ${statCard('#fff3cd','var(--amber2)','📦',myI.reduce((s,r)=>s+r.remainingBags,0),'Bags In Storage')}
+      ${statCard('#cce5ff','#004085','🧾',receipts.filter(r=>r.farmerId===u.id).length,'Receipts')}
+      ${statCard('#d4edda','var(--g1)','✅',myW.length,'Withdrawals Done')}
+    </div>`;
+    const bycereal={};
+    myI.forEach(r=>{ bycereal[r.cereal]=(bycereal[r.cereal]||0)+r.remainingBags; });
+    html+=`<div class="card"><div class="card-header">🌾 My Stored Cereals</div><div class="card-body">${Object.keys(bycereal).length?Object.entries(bycereal).map(([c,b])=>`<div class="flex justify-between items-center mb2" style="background:#f0f9f0;border-radius:8px;padding:.6rem"><span class="capitalize fw-bold">${c}</span><span class="tag">${b} bags</span></div>`).join(''):'<div class="text-muted text-center">No grain currently in storage</div>'}</div></div>`;
+  }
+  document.getElementById('reports-content').innerHTML = html;
+}
+
+// ---- PROFILE ----
+function renderProfile() {
+  const u = currentUser;
+  document.getElementById('profile-content').innerHTML = `
+    <div class="form-row cols-2">
+      <div class="form-group"><label>First Name</label><input class="form-control" id="prof-fname" value="${u.firstName}"></div>
+      <div class="form-group"><label>Last Name</label><input class="form-control" id="prof-lname" value="${u.lastName}"></div>
+      <div class="form-group"><label>Phone</label><input class="form-control" id="prof-phone" value="${u.phone}"></div>
+      <div class="form-group"><label>Email</label><input class="form-control" id="prof-email" type="email" value="${u.email||''}"></div>
+      <div class="form-group"><label>County</label><input class="form-control" value="${u.county}" readonly style="background:#f8f8f8"></div>
+      <div class="form-group"><label>Role</label><input class="form-control" value="${{farmer:'Farmer',operator:'Warehouse Operator',admin:'Admin'}[u.role]}" readonly style="background:#f8f8f8"></div>
+    </div>`;
+}
+function saveProfile() { alert('✅ Profile updated successfully!\n(In production this saves to PostgreSQL.)'); }
+
+// ---- RECEIPT VERIFY ----
+function verifyReceipt() {
+  const code = document.getElementById('verify-input').value.trim();
+  const r = receipts.find(x=>x.code===code);
+  const el = document.getElementById('verify-result');
+  if(!code) { el.innerHTML=''; return; }
+  if(r&&r.isValid) {
+    const wh=getWH(r.warehouseId), farmer=getUser(r.farmerId);
+    el.innerHTML=`<div class="alert alert-success">✅ Receipt is Valid</div><div class="card"><div class="card-body" style="font-size:.88rem">
+      ${[['Farmer',`${farmer?.firstName} ${farmer?.lastName}`],['Warehouse',wh?.name],['Location',`${wh?.county}`],['Cereal',r.cereal],['Quantity',`${r.bags} bags (${r.mt} MT)`],['Period',`${formatDate(r.start)} – ${formatDate(r.end)}`],['Issued',formatDate(r.issuedAt)]].map(([l,v])=>`<div class="r-row"><span class="r-label">${l}</span><span class="r-val capitalize">${v}</span></div>`).join('')}
+    </div></div>`;
+  } else if(r&&!r.isValid) {
+    el.innerHTML=`<div class="alert alert-warning">⚠️ This receipt has been voided.</div>`;
+  } else {
+    el.innerHTML=`<div class="alert alert-danger">❌ No receipt found with code "${code}"</div>`;
+  }
+}
+function publicVerify() {
+  const code = document.getElementById('pub-verify-input').value.trim();
+  const r = receipts.find(x=>x.code===code);
+  const el = document.getElementById('pub-verify-result');
+  if(!code) { el.innerHTML=''; return; }
+  if(r&&r.isValid) {
+    const wh=getWH(r.warehouseId), farmer=getUser(r.farmerId);
+    el.innerHTML=`<div class="alert alert-success">✅ Receipt Valid</div><div class="card"><div class="card-body" style="font-size:.85rem">
+      <div class="r-row"><span class="r-label">Farmer</span><span class="r-val">${farmer?.firstName} ${farmer?.lastName}</span></div>
+      <div class="r-row"><span class="r-label">Warehouse</span><span class="r-val">${wh?.name}</span></div>
+      <div class="r-row"><span class="r-label">Cereal</span><span class="r-val capitalize">${r.cereal}</span></div>
+      <div class="r-row"><span class="r-label">Qty</span><span class="r-val">${r.bags} bags</span></div>
+    </div></div>`;
+  } else { el.innerHTML=`<div class="alert alert-danger">❌ Receipt not found: "${code}"</div>`; }
+}
+
+// ---- MODAL ----
+function closeModal() {
+  document.getElementById('confirm-modal').classList.remove('open');
+  document.getElementById('modal-confirm-btn').style.display='';
+  modalCallback=null;
+}
+function modalConfirm() { if(modalCallback) modalCallback(); }
+
+// ---- KEYBOARD ----
+document.addEventListener('keydown', e => { if(e.key==='Escape') closeModal(); });
+</script>
+</body></html>

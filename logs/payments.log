@@ -1,0 +1,323 @@
+DEBUG 2026-04-29 18:16:58,855 mpesa 36024 28724 M-Pesa Query Response: {
+  "fault": {
+    "faultstring": "Spike arrest violation. Allowed rate : MessageRate{messagesPerPeriod=5, periodInMicroseconds=60000000, maxBurstMessageCount=1.0}",
+    "detail": {
+      "errorcode": "policies.ratelimit.SpikeArrestViolation"
+    }
+  }
+}
+ERROR 2026-04-29 18:16:58,857 views 36024 28724 Error querying payment status for PAY-6E6FC6A6
+Traceback (most recent call last):
+  File "C:\Users\HP\Downloads\DCWMS_Complete_Django_Project\dcwms_django\payments\mpesa.py", line 128, in query_payment_status
+    raise Exception(f"M-Pesa Error: HTTP {response.status_code} - {response.text or 'No response body'}")
+Exception: M-Pesa Error: HTTP 429 - {"fault":{"faultstring":"Spike arrest violation. Allowed rate : MessageRate{messagesPerPeriod=5, periodInMicroseconds=60000000, maxBurstMessageCount=1.0}","detail":{"errorcode":"policies.ratelimit.SpikeArrestViolation"}}}
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\HP\Downloads\DCWMS_Complete_Django_Project\dcwms_django\payments\views.py", line 230, in check_payment_status
+    query_response = mpesa_service.query_payment_status(payment.mpesa_transaction_id)
+  File "C:\Users\HP\Downloads\DCWMS_Complete_Django_Project\dcwms_django\payments\mpesa.py", line 145, in query_payment_status
+    raise Exception(f"Failed to query payment status: {str(e)}")
+Exception: Failed to query payment status: M-Pesa Error: HTTP 429 - {"fault":{"faultstring":"Spike arrest violation. Allowed rate : MessageRate{messagesPerPeriod=5, periodInMicroseconds=60000000, maxBurstMessageCount=1.0}","detail":{"errorcode":"policies.ratelimit.SpikeArrestViolation"}}}
+DEBUG 2026-04-29 18:17:08,615 mpesa 36024 28724 M-Pesa Query Response: {
+  "fault": {
+    "faultstring": "Spike arrest violation. Allowed rate : MessageRate{messagesPerPeriod=5, periodInMicroseconds=60000000, maxBurstMessageCount=1.0}",
+    "detail": {
+      "errorcode": "policies.ratelimit.SpikeArrestViolation"
+    }
+  }
+}
+ERROR 2026-04-29 18:17:08,616 views 36024 28724 Error querying payment status for PAY-6E6FC6A6
+Traceback (most recent call last):
+  File "C:\Users\HP\Downloads\DCWMS_Complete_Django_Project\dcwms_django\payments\mpesa.py", line 128, in query_payment_status
+    raise Exception(f"M-Pesa Error: HTTP {response.status_code} - {response.text or 'No response body'}")
+Exception: M-Pesa Error: HTTP 429 - {"fault":{"faultstring":"Spike arrest violation. Allowed rate : MessageRate{messagesPerPeriod=5, periodInMicroseconds=60000000, maxBurstMessageCount=1.0}","detail":{"errorcode":"policies.ratelimit.SpikeArrestViolation"}}}
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\HP\Downloads\DCWMS_Complete_Django_Project\dcwms_django\payments\views.py", line 230, in check_payment_status
+    query_response = mpesa_service.query_payment_status(payment.mpesa_transaction_id)
+  File "C:\Users\HP\Downloads\DCWMS_Complete_Django_Project\dcwms_django\payments\mpesa.py", line 145, in query_payment_status
+    raise Exception(f"Failed to query payment status: {str(e)}")
+Exception: Failed to query payment status: M-Pesa Error: HTTP 429 - {"fault":{"faultstring":"Spike arrest violation. Allowed rate : MessageRate{messagesPerPeriod=5, periodInMicroseconds=60000000, maxBurstMessageCount=1.0}","detail":{"errorcode":"policies.ratelimit.SpikeArrestViolation"}}}
+ERROR 2026-04-29 18:17:17,954 views 36024 28724 Error querying payment status for PAY-6E6FC6A6
+Traceback (most recent call last):
+  File "C:\Users\HP\Downloads\DCWMS_Complete_Django_Project\dcwms_django\env\Lib\site-packages\requests\models.py", line 978, in json
+    return complexjson.loads(self.text, **kwargs)
+           ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\AppData\Local\Programs\Python\Python313\Lib\json\__init__.py", line 346, in loads
+    return _default_decoder.decode(s)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^
+  File "C:\Users\HP\AppData\Local\Programs\Python\Python313\Lib\json\decoder.py", line 345, in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+               ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\AppData\Local\Programs\Python\Python313\Lib\json\decoder.py", line 363, in raw_decode
+    raise JSONDecodeError("Expecting value", s, err.value) from None
+json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\HP\Downloads\DCWMS_Complete_Django_Project\dcwms_django\payments\mpesa.py", line 102, in query_payment_status
+    response_data = response.json() if response.text else {}
+                    ~~~~~~~~~~~~~^^
+  File "C:\Users\HP\Downloads\DCWMS_Complete_Django_Project\dcwms_django\env\Lib\site-packages\requests\models.py", line 982, in json
+    raise RequestsJSONDecodeError(e.msg, e.doc, e.pos)
+requests.exceptions.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\HP\Downloads\DCWMS_Complete_Django_Project\dcwms_django\payments\views.py", line 230, in check_payment_status
+    query_response = mpesa_service.query_payment_status(payment.mpesa_transaction_id)
+  File "C:\Users\HP\Downloads\DCWMS_Complete_Django_Project\dcwms_django\payments\mpesa.py", line 141, in query_payment_status
+    raise Exception(f"Network error querying payment status: {str(e)}")
+Exception: Network error querying payment status: Expecting value: line 1 column 1 (char 0)
+ERROR 2026-04-29 18:17:36,563 views 36024 14232 Error querying payment status for PAY-6E6FC6A6
+Traceback (most recent call last):
+  File "C:\Users\HP\Downloads\DCWMS_Complete_Django_Project\dcwms_django\payments\mpesa.py", line 35, in get_access_token
+    response.raise_for_status()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\HP\Downloads\DCWMS_Complete_Django_Project\dcwms_django\env\Lib\site-packages\requests\models.py", line 1028, in raise_for_status
+    raise HTTPError(http_error_msg, response=self)
+requests.exceptions.HTTPError: 403 Client Error: Forbidden for url: https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\HP\Downloads\DCWMS_Complete_Django_Project\dcwms_django\payments\mpesa.py", line 77, in query_payment_status
+    access_token = self.get_access_token()
+  File "C:\Users\HP\Downloads\DCWMS_Complete_Django_Project\dcwms_django\payments\mpesa.py", line 38, in get_access_token
+    raise Exception(f"Failed to get access token: {str(e)}")
+Exception: Failed to get access token: 403 Client Error: Forbidden for url: https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\HP\Downloads\DCWMS_Complete_Django_Project\dcwms_django\payments\views.py", line 230, in check_payment_status
+    query_response = mpesa_service.query_payment_status(payment.mpesa_transaction_id)
+  File "C:\Users\HP\Downloads\DCWMS_Complete_Django_Project\dcwms_django\payments\mpesa.py", line 145, in query_payment_status
+    raise Exception(f"Failed to query payment status: {str(e)}")
+Exception: Failed to query payment status: Failed to get access token: 403 Client Error: Forbidden for url: https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials
+ERROR 2026-04-29 18:17:46,889 views 36024 14232 Error querying payment status for PAY-6E6FC6A6
+Traceback (most recent call last):
+  File "C:\Users\HP\Downloads\DCWMS_Complete_Django_Project\dcwms_django\payments\mpesa.py", line 35, in get_access_token
+    response.raise_for_status()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\HP\Downloads\DCWMS_Complete_Django_Project\dcwms_django\env\Lib\site-packages\requests\models.py", line 1028, in raise_for_status
+    raise HTTPError(http_error_msg, response=self)
+requests.exceptions.HTTPError: 403 Client Error: Forbidden for url: https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\HP\Downloads\DCWMS_Complete_Django_Project\dcwms_django\payments\mpesa.py", line 77, in query_payment_status
+    access_token = self.get_access_token()
+  File "C:\Users\HP\Downloads\DCWMS_Complete_Django_Project\dcwms_django\payments\mpesa.py", line 38, in get_access_token
+    raise Exception(f"Failed to get access token: {str(e)}")
+Exception: Failed to get access token: 403 Client Error: Forbidden for url: https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\HP\Downloads\DCWMS_Complete_Django_Project\dcwms_django\payments\views.py", line 230, in check_payment_status
+    query_response = mpesa_service.query_payment_status(payment.mpesa_transaction_id)
+  File "C:\Users\HP\Downloads\DCWMS_Complete_Django_Project\dcwms_django\payments\mpesa.py", line 145, in query_payment_status
+    raise Exception(f"Failed to query payment status: {str(e)}")
+Exception: Failed to query payment status: Failed to get access token: 403 Client Error: Forbidden for url: https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials
+ERROR 2026-04-29 18:17:57,093 views 36024 14232 Error querying payment status for PAY-6E6FC6A6
+Traceback (most recent call last):
+  File "C:\Users\HP\Downloads\DCWMS_Complete_Django_Project\dcwms_django\payments\mpesa.py", line 35, in get_access_token
+    response.raise_for_status()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\HP\Downloads\DCWMS_Complete_Django_Project\dcwms_django\env\Lib\site-packages\requests\models.py", line 1028, in raise_for_status
+    raise HTTPError(http_error_msg, response=self)
+requests.exceptions.HTTPError: 403 Client Error: Forbidden for url: https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\HP\Downloads\DCWMS_Complete_Django_Project\dcwms_django\payments\mpesa.py", line 77, in query_payment_status
+    access_token = self.get_access_token()
+  File "C:\Users\HP\Downloads\DCWMS_Complete_Django_Project\dcwms_django\payments\mpesa.py", line 38, in get_access_token
+    raise Exception(f"Failed to get access token: {str(e)}")
+Exception: Failed to get access token: 403 Client Error: Forbidden for url: https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\HP\Downloads\DCWMS_Complete_Django_Project\dcwms_django\payments\views.py", line 230, in check_payment_status
+    query_response = mpesa_service.query_payment_status(payment.mpesa_transaction_id)
+  File "C:\Users\HP\Downloads\DCWMS_Complete_Django_Project\dcwms_django\payments\mpesa.py", line 145, in query_payment_status
+    raise Exception(f"Failed to query payment status: {str(e)}")
+Exception: Failed to query payment status: Failed to get access token: 403 Client Error: Forbidden for url: https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials
+ERROR 2026-04-29 18:18:07,928 views 36024 14232 Error querying payment status for PAY-6E6FC6A6
+Traceback (most recent call last):
+  File "C:\Users\HP\Downloads\DCWMS_Complete_Django_Project\dcwms_django\payments\mpesa.py", line 35, in get_access_token
+    response.raise_for_status()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\HP\Downloads\DCWMS_Complete_Django_Project\dcwms_django\env\Lib\site-packages\requests\models.py", line 1028, in raise_for_status
+    raise HTTPError(http_error_msg, response=self)
+requests.exceptions.HTTPError: 403 Client Error: Forbidden for url: https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\HP\Downloads\DCWMS_Complete_Django_Project\dcwms_django\payments\mpesa.py", line 77, in query_payment_status
+    access_token = self.get_access_token()
+  File "C:\Users\HP\Downloads\DCWMS_Complete_Django_Project\dcwms_django\payments\mpesa.py", line 38, in get_access_token
+    raise Exception(f"Failed to get access token: {str(e)}")
+Exception: Failed to get access token: 403 Client Error: Forbidden for url: https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\HP\Downloads\DCWMS_Complete_Django_Project\dcwms_django\payments\views.py", line 230, in check_payment_status
+    query_response = mpesa_service.query_payment_status(payment.mpesa_transaction_id)
+  File "C:\Users\HP\Downloads\DCWMS_Complete_Django_Project\dcwms_django\payments\mpesa.py", line 145, in query_payment_status
+    raise Exception(f"Failed to query payment status: {str(e)}")
+Exception: Failed to query payment status: Failed to get access token: 403 Client Error: Forbidden for url: https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials
+ERROR 2026-04-29 18:18:16,657 views 36024 14232 Error querying payment status for PAY-6E6FC6A6
+Traceback (most recent call last):
+  File "C:\Users\HP\Downloads\DCWMS_Complete_Django_Project\dcwms_django\payments\mpesa.py", line 35, in get_access_token
+    response.raise_for_status()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\HP\Downloads\DCWMS_Complete_Django_Project\dcwms_django\env\Lib\site-packages\requests\models.py", line 1028, in raise_for_status
+    raise HTTPError(http_error_msg, response=self)
+requests.exceptions.HTTPError: 403 Client Error: Forbidden for url: https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\HP\Downloads\DCWMS_Complete_Django_Project\dcwms_django\payments\mpesa.py", line 77, in query_payment_status
+    access_token = self.get_access_token()
+  File "C:\Users\HP\Downloads\DCWMS_Complete_Django_Project\dcwms_django\payments\mpesa.py", line 38, in get_access_token
+    raise Exception(f"Failed to get access token: {str(e)}")
+Exception: Failed to get access token: 403 Client Error: Forbidden for url: https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\HP\Downloads\DCWMS_Complete_Django_Project\dcwms_django\payments\views.py", line 230, in check_payment_status
+    query_response = mpesa_service.query_payment_status(payment.mpesa_transaction_id)
+  File "C:\Users\HP\Downloads\DCWMS_Complete_Django_Project\dcwms_django\payments\mpesa.py", line 145, in query_payment_status
+    raise Exception(f"Failed to query payment status: {str(e)}")
+Exception: Failed to query payment status: Failed to get access token: 403 Client Error: Forbidden for url: https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials
+DEBUG 2026-04-29 18:19:18,965 mpesa 36024 4140 M-Pesa Query Response: {
+  "ResponseCode": "0",
+  "ResponseDescription": "The service request has been accepted successfully",
+  "MerchantRequestID": "98af-41cc-b897-7b9aa487500955298",
+  "CheckoutRequestID": "ws_CO_29042026181653192111818163",
+  "ResultCode": "0",
+  "ResultDesc": "The service request is processed successfully."
+}
+INFO 2026-04-29 18:19:18,970 views 36024 4140 Payment status check response for PAY-6E6FC6A6: {'ResponseCode': '0', 'ResponseDescription': 'The service request has been accepted successfully', 'MerchantRequestID': '98af-41cc-b897-7b9aa487500955298', 'CheckoutRequestID': 'ws_CO_29042026181653192111818163', 'ResultCode': '0', 'ResultDesc': 'The service request is processed successfully.'}
+INFO 2026-04-29 18:19:18,971 views 36024 4140 Payment PAY-6E6FC6A6 ResultCode: 0
+INFO 2026-04-29 18:19:18,972 views 36024 4140 Payment PAY-6E6FC6A6 confirmed - ResultCode 0
+ERROR 2026-04-29 18:19:19,024 views 36024 4140 Error querying payment status for PAY-6E6FC6A6
+Traceback (most recent call last):
+  File "C:\Users\HP\Downloads\DCWMS_Complete_Django_Project\dcwms_django\payments\views.py", line 271, in check_payment_status
+    payment.mark_completed(receipt_number=receipt_number)
+    ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\Downloads\DCWMS_Complete_Django_Project\dcwms_django\payments\models.py", line 85, in mark_completed
+    self._create_inventory_record()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\HP\Downloads\DCWMS_Complete_Django_Project\dcwms_django\payments\models.py", line 95, in _create_inventory_record
+    warehouse.available_capacity_mt -= booking.quantity_mt
+TypeError: unsupported operand type(s) for -=: 'decimal.Decimal' and 'float'
+ERROR 2026-04-29 18:19:32,967 views 36024 28692 Error querying payment status for PAY-6E6FC6A6
+Traceback (most recent call last):
+  File "C:\Users\HP\Downloads\DCWMS_Complete_Django_Project\dcwms_django\env\Lib\site-packages\urllib3\connection.py", line 204, in _new_conn
+    sock = connection.create_connection(
+        (self._dns_host, self.port),
+    ...<2 lines>...
+        socket_options=self.socket_options,
+    )
+  File "C:\Users\HP\Downloads\DCWMS_Complete_Django_Project\dcwms_django\env\Lib\site-packages\urllib3\util\connection.py", line 85, in create_connection
+    raise err
+  File "C:\Users\HP\Downloads\DCWMS_Complete_Django_Project\dcwms_django\env\Lib\site-packages\urllib3\util\connection.py", line 73, in create_connection
+    sock.connect(sa)
+    ~~~~~~~~~~~~^^^^
+TimeoutError: [WinError 10060] A connection attempt failed because the connected party did not properly respond after a period of time, or established connection failed because connected host has failed to respond
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\HP\Downloads\DCWMS_Complete_Django_Project\dcwms_django\env\Lib\site-packages\urllib3\connectionpool.py", line 787, in urlopen
+    response = self._make_request(
+        conn,
+    ...<10 lines>...
+        **response_kw,
+    )
+  File "C:\Users\HP\Downloads\DCWMS_Complete_Django_Project\dcwms_django\env\Lib\site-packages\urllib3\connectionpool.py", line 488, in _make_request
+    raise new_e
+  File "C:\Users\HP\Downloads\DCWMS_Complete_Django_Project\dcwms_django\env\Lib\site-packages\urllib3\connectionpool.py", line 464, in _make_request
+    self._validate_conn(conn)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "C:\Users\HP\Downloads\DCWMS_Complete_Django_Project\dcwms_django\env\Lib\site-packages\urllib3\connectionpool.py", line 1093, in _validate_conn
+    conn.connect()
+    ~~~~~~~~~~~~^^
+  File "C:\Users\HP\Downloads\DCWMS_Complete_Django_Project\dcwms_django\env\Lib\site-packages\urllib3\connection.py", line 759, in connect
+    self.sock = sock = self._new_conn()
+                       ~~~~~~~~~~~~~~^^
+  File "C:\Users\HP\Downloads\DCWMS_Complete_Django_Project\dcwms_django\env\Lib\site-packages\urllib3\connection.py", line 213, in _new_conn
+    raise ConnectTimeoutError(
+    ...<2 lines>...
+    ) from e
+urllib3.exceptions.ConnectTimeoutError: (<HTTPSConnection(host='sandbox.safaricom.co.ke', port=443) at 0x1910bc28f50>, 'Connection to sandbox.safaricom.co.ke timed out. (connect timeout=None)')
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\HP\Downloads\DCWMS_Complete_Django_Project\dcwms_django\env\Lib\site-packages\requests\adapters.py", line 645, in send
+    resp = conn.urlopen(
+        method=request.method,
+    ...<9 lines>...
+        chunked=chunked,
+    )
+  File "C:\Users\HP\Downloads\DCWMS_Complete_Django_Project\dcwms_django\env\Lib\site-packages\urllib3\connectionpool.py", line 841, in urlopen
+    retries = retries.increment(
+        method, url, error=new_e, _pool=self, _stacktrace=sys.exc_info()[2]
+    )
+  File "C:\Users\HP\Downloads\DCWMS_Complete_Django_Project\dcwms_django\env\Lib\site-packages\urllib3\util\retry.py", line 535, in increment
+    raise MaxRetryError(_pool, url, reason) from reason  # type: ignore[arg-type]
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+urllib3.exceptions.MaxRetryError: HTTPSConnectionPool(host='sandbox.safaricom.co.ke', port=443): Max retries exceeded with url: /oauth/v1/generate?grant_type=client_credentials (Caused by ConnectTimeoutError(<HTTPSConnection(host='sandbox.safaricom.co.ke', port=443) at 0x1910bc28f50>, 'Connection to sandbox.safaricom.co.ke timed out. (connect timeout=None)'))
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\HP\Downloads\DCWMS_Complete_Django_Project\dcwms_django\payments\mpesa.py", line 34, in get_access_token
+    response = requests.get(f"{self.base_url}/oauth/v1/generate?grant_type=client_credentials", headers=headers)
+  File "C:\Users\HP\Downloads\DCWMS_Complete_Django_Project\dcwms_django\env\Lib\site-packages\requests\api.py", line 73, in get
+    return request("get", url, params=params, **kwargs)
+  File "C:\Users\HP\Downloads\DCWMS_Complete_Django_Project\dcwms_django\env\Lib\site-packages\requests\api.py", line 59, in request
+    return session.request(method=method, url=url, **kwargs)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\Downloads\DCWMS_Complete_Django_Project\dcwms_django\env\Lib\site-packages\requests\sessions.py", line 592, in request
+    resp = self.send(prep, **send_kwargs)
+  File "C:\Users\HP\Downloads\DCWMS_Complete_Django_Project\dcwms_django\env\Lib\site-packages\requests\sessions.py", line 706, in send
+    r = adapter.send(request, **kwargs)
+  File "C:\Users\HP\Downloads\DCWMS_Complete_Django_Project\dcwms_django\env\Lib\site-packages\requests\adapters.py", line 666, in send
+    raise ConnectTimeout(e, request=request)
+requests.exceptions.ConnectTimeout: HTTPSConnectionPool(host='sandbox.safaricom.co.ke', port=443): Max retries exceeded with url: /oauth/v1/generate?grant_type=client_credentials (Caused by ConnectTimeoutError(<HTTPSConnection(host='sandbox.safaricom.co.ke', port=443) at 0x1910bc28f50>, 'Connection to sandbox.safaricom.co.ke timed out. (connect timeout=None)'))
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\HP\Downloads\DCWMS_Complete_Django_Project\dcwms_django\payments\mpesa.py", line 77, in query_payment_status
+    access_token = self.get_access_token()
+  File "C:\Users\HP\Downloads\DCWMS_Complete_Django_Project\dcwms_django\payments\mpesa.py", line 38, in get_access_token
+    raise Exception(f"Failed to get access token: {str(e)}")
+Exception: Failed to get access token: HTTPSConnectionPool(host='sandbox.safaricom.co.ke', port=443): Max retries exceeded with url: /oauth/v1/generate?grant_type=client_credentials (Caused by ConnectTimeoutError(<HTTPSConnection(host='sandbox.safaricom.co.ke', port=443) at 0x1910bc28f50>, 'Connection to sandbox.safaricom.co.ke timed out. (connect timeout=None)'))
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\HP\Downloads\DCWMS_Complete_Django_Project\dcwms_django\payments\views.py", line 230, in check_payment_status
+    query_response = mpesa_service.query_payment_status(payment.mpesa_transaction_id)
+  File "C:\Users\HP\Downloads\DCWMS_Complete_Django_Project\dcwms_django\payments\mpesa.py", line 145, in query_payment_status
+    raise Exception(f"Failed to query payment status: {str(e)}")
+Exception: Failed to query payment status: Failed to get access token: HTTPSConnectionPool(host='sandbox.safaricom.co.ke', port=443): Max retries exceeded with url: /oauth/v1/generate?grant_type=client_credentials (Caused by ConnectTimeoutError(<HTTPSConnection(host='sandbox.safaricom.co.ke', port=443) at 0x1910bc28f50>, 'Connection to sandbox.safaricom.co.ke timed out. (connect timeout=None)'))

@@ -1,0 +1,22 @@
+{% extends "admin/base.html" %}
+{% load static %}
+
+{% block title %}DCWMS Admin Portal{% endblock %}
+
+{% block branding %}
+<div class="dcwms-branding">
+  <a href="{% url 'admin:index' %}" class="branding-logo">DCWMS</a>
+  <div class="branding-copy">
+    <p class="branding-title">DCWMS Administration</p>
+    <p class="branding-subtitle">Digital Cereal Warehouse Management System</p>
+  </div>
+</div>
+{% endblock %}
+
+{% block nav-global %}
+{{ block.super }}
+<div class="admin-quicklinks">
+  <a href="{% url 'admin:logout' %}">Log out</a>
+  <a href="/" class="internal-link">View site</a>
+</div>
+{% endblock %}

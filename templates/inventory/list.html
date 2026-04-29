@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+{% block title %}Inventory{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h4 class="mb-0" style="font-family:'Nunito',sans-serif;font-weight:800;"><i class="bi bi-box-seam me-2"></i>Grain Inventory</h4>
+</div>
+<div class="card">
+  <div class="card-body p-0">
+    {% if records %}
+    <div class="table-responsive">
+      <table class="table mb-0">
+        <thead><tr><th>Warehouse</th><th>Farmer</th><th>Cereal</th><th>Original</th><th>Remaining</th><th>Status</th><th>Stored</th><th></th></tr></thead>
+        <tbody>
+          {% for r in records %}
+          <tr>
+            <td style="font-size:.88rem;font-weight:600;">{{ r.warehouse.name }}<br><span style="font-size:.75rem;font-weight:400;color:#6c757d;">{{ r.warehouse.county }}</span></td>
+            <td style="font-size:.88rem;">{{ r.farmer.get_full_name }}</td>
+            <td class="text-capitalize" style="font-size:.88rem;">{{ r.cereal_type }}</td>
+            <td style="font-size:.88rem;">{{ r.quantity_bags }} bags</td>
+            <td>
+              <div style="font-weight:700;font-size:.92rem;">{{ r.remaining_bags }} bags</div>
+              <div style="font-size:.75rem;color:#6c757d;">{{ r.remaining_mt }} MT</div>
+            </td>
+            <td>
+              <span class="badge rounded-pill {% if r.status == 'stored' %}badge-approved{% elif r.status == 'fully_withdrawn' %}badge-completed{% else %}badge-pending{% endif %}">
+                {{ r.get_status_display }}
+              </span>
+            </td>
+            <td style="font-size:.82rem;">{{ r.date_stored|date:"d M Y" }}</td>
+            <td>
+              <a href="{% url 'inventory:detail' r.pk %}" class="btn btn-sm btn-outline-secondary">View</a>
+              {% if user.is_farmer and r.remaining_bags > 0 %}
+              <a href="{% url 'withdrawals:schedule' r.pk %}" class="btn btn-sm btn-outline-warning ms-1">Withdraw</a>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+      <div class="text-center py-5 text-muted">
+        <i class="bi bi-box" style="font-size:2.5rem;display:block;margin-bottom:.5rem;"></i>
+        No inventory records yet. Inventory is created when a booking is approved.
+      </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

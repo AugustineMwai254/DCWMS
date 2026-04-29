@@ -1,0 +1,89 @@
+{% extends 'base.html' %}
+{% block title %}Schedule Withdrawal{% endblock %}
+{% block content %}
+<div class="mb-4">
+  <nav aria-label="breadcrumb"><ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="{% url 'inventory:list' %}">My Storage</a></li>
+    <li class="breadcrumb-item active">Schedule Withdrawal</li>
+  </ol></nav>
+  <h4 style="font-family:'Nunito',sans-serif;font-weight:800;">📤 Schedule Withdrawal</h4>
+</div>
+<div class="row g-4">
+  <div class="col-md-7">
+    <form method="post">
+      {% csrf_token %}
+      {% if form.non_field_errors %}<div class="alert alert-danger">{{ form.non_field_errors }}</div>{% endif %}
+      <div class="form-section">
+        <div class="form-section-title">Withdrawal Details</div>
+        <div class="row g-3">
+          <div class="col-6">
+            <label class="form-label">Bags to Withdraw *</label>
+            <input type="number" name="bags_to_withdraw"
+              class="form-control {% if form.bags_to_withdraw.errors %}is-invalid{% endif %}"
+              min="1" max="{{ record.remaining_bags }}"
+              value="{{ form.bags_to_withdraw.value|default:'' }}" id="withdrawBags">
+            <div class="form-text">Max: {{ record.remaining_bags }} bags remaining</div>
+            {% if form.bags_to_withdraw.errors %}<div class="invalid-feedback">{{ form.bags_to_withdraw.errors.0 }}</div>{% endif %}
+          </div>
+          <div class="col-6">
+            <label class="form-label">Scheduled Date *</label>
+            <input type="date" name="scheduled_date"
+              class="form-control {% if form.scheduled_date.errors %}is-invalid{% endif %}"
+              value="{{ form.scheduled_date.value|default:'' }}" min="{{ today }}">
+            {% if form.scheduled_date.errors %}<div class="invalid-feedback">{{ form.scheduled_date.errors.0 }}</div>{% endif %}
+          </div>
+        </div>
+        <div class="mt-2 p-2 rounded" id="withdrawInfo" style="background:#fff3cd;font-size:.83rem;display:none;">
+          <i class="bi bi-info-circle me-1 text-warning"></i>
+          Withdrawing <strong id="wd_bags">0</strong> bags = <strong id="wd_mt">0</strong> MT.
+          Remaining after: <strong id="wd_remaining">{{ record.remaining_bags }}</strong> bags.
+        </div>
+      </div>
+      <div class="form-section">
+        <div class="form-section-title">Notes</div>
+        <textarea name="farmer_notes" class="form-control" rows="3"
+          placeholder="Transport arrangements or any special notes...">{{ form.farmer_notes.value|default:'' }}</textarea>
+      </div>
+      <button type="submit" class="btn btn-warning w-100 py-2" style="font-weight:700;">
+        <i class="bi bi-send me-2"></i>Submit Withdrawal Request
+      </button>
+    </form>
+  </div>
+  <div class="col-md-5">
+    <div class="card" style="position:sticky;top:80px;">
+      <div class="card-body">
+        <h6 style="font-weight:700;color:#1e7e34;"><i class="bi bi-box-seam me-2"></i>Storage Summary</h6>
+        <div style="font-size:.88rem;">
+          <div class="d-flex justify-content-between py-2 border-bottom"><span class="text-muted">Warehouse</span><span class="fw-semibold">{{ record.warehouse.name }}</span></div>
+          <div class="d-flex justify-content-between py-2 border-bottom"><span class="text-muted">Cereal</span><span class="fw-semibold text-capitalize">{{ record.cereal_type }}</span></div>
+          <div class="d-flex justify-content-between py-2 border-bottom"><span class="text-muted">Original Bags</span><span class="fw-semibold">{{ record.quantity_bags }}</span></div>
+          <div class="d-flex justify-content-between py-2"><span class="text-muted">Remaining</span>
+            <span style="font-weight:800;color:#1e7e34;font-size:1.1rem;">{{ record.remaining_bags }} bags</span></div>
+        </div>
+        <div class="mt-3 p-2 rounded text-center" style="background:#d4edda;">
+          <div style="font-size:.75rem;color:#6c757d;">Available to Withdraw</div>
+          <div style="font-size:1.5rem;font-weight:800;color:#1e7e34;">{{ record.remaining_bags }}</div>
+          <div style="font-size:.75rem;color:#6c757d;">bags ({{ record.remaining_mt }} MT)</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script>
+const maxBags = {{ record.remaining_bags }};
+document.getElementById('withdrawBags').addEventListener('input', function() {
+  const bags = parseInt(this.value) || 0;
+  if (bags > 0) {
+    document.getElementById('wd_bags').textContent = bags;
+    document.getElementById('wd_mt').textContent = (bags * 90 / 1000).toFixed(3);
+    document.getElementById('wd_remaining').textContent = maxBags - bags;
+    document.getElementById('withdrawInfo').style.display = 'block';
+  } else {
+    document.getElementById('withdrawInfo').style.display = 'none';
+  }
+});
+document.querySelector('[name=scheduled_date]').min = new Date().toISOString().split('T')[0];
+</script>
+{% endblock %}

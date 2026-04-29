@@ -1,0 +1,283 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title mb-0">
+                        <i class="fas fa-receipt text-primary me-2"></i>
+                        Payment Status - {{ payment.payment_ref }}
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h5>Payment Details</h5>
+                            <table class="table table-sm">
+                                <tr>
+                                    <td><strong>Reference:</strong></td>
+                                    <td>{{ payment.payment_ref }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Amount:</strong></td>
+                                    <td>KES {{ payment.amount_kes|floatformat:2 }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Method:</strong></td>
+                                    <td>{{ payment.get_payment_method_display }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Status:</strong></td>
+                                    <td id="status-badge">
+                                        {% if payment.status == 'completed' %}
+                                            <span class="badge bg-success">Completed</span>
+                                        {% elif payment.status == 'processing' %}
+                                            <span class="badge bg-warning">Processing</span>
+                                        {% elif payment.status == 'failed' %}
+                                            <span class="badge bg-danger">Failed</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">{{ payment.get_status_display }}</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Tracking Code:</strong></td>
+                                    <td>{{ payment.tracking_code }}</td>
+                                </tr>
+                                {% if payment.mpesa_receipt_number %}
+                                <tr>
+                                    <td><strong>MPesa Receipt:</strong></td>
+                                    <td>{{ payment.mpesa_receipt_number }}</td>
+                                </tr>
+                                {% endif %}
+                                <tr>
+                                    <td><strong>Initiated:</strong></td>
+                                    <td>{{ payment.initiated_at|date:"M d, Y H:i" }}</td>
+                                </tr>
+                                {% if payment.completed_at %}
+                                <tr>
+                                    <td><strong>Completed:</strong></td>
+                                    <td>{{ payment.completed_at|date:"M d, Y H:i" }}</td>
+                                </tr>
+                                {% endif %}
+                            </table>
+                        </div>
+                        <div class="col-md-6">
+                            <h5>Booking Details</h5>
+                            <table class="table table-sm">
+                                <tr>
+                                    <td><strong>Booking:</strong></td>
+                                    <td>{{ payment.booking.booking_ref_human }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Warehouse:</strong></td>
+                                    <td>{{ payment.booking.warehouse.name }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Cereal Type:</strong></td>
+                                    <td>{{ payment.booking.cereal_type|capfirst }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Quantity:</strong></td>
+                                    <td>{{ payment.booking.quantity_bags }} bags ({{ payment.booking.quantity_mt }} MT)</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Duration:</strong></td>
+                                    <td>{{ payment.booking.storage_start_date }} to {{ payment.booking.storage_end_date }}</td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div id="status-message">
+                        {% if payment.status == 'processing' %}
+                            <div class="alert alert-info mt-3">
+                                <i class="fas fa-spinner fa-spin me-2"></i>
+                                <strong>Payment in Progress:</strong> Please check your phone and complete the MPesa payment. This page will update automatically once payment is confirmed.
+                            </div>
+                            <div class="text-center mb-3">
+                                <a href="{% url 'payments:check_manual' payment.payment_id %}" class="btn btn-warning btn-sm">
+                                    <i class="fas fa-check me-2"></i>
+                                    Check Manually
+                                </a>
+                            </div>
+                            <div class="text-center">
+                                <a href="{% url 'bookings:detail' payment.booking.id %}" class="btn btn-primary">
+                                    <i class="fas fa-arrow-left me-2"></i>
+                                    Back to Booking
+                                </a>
+                            </div>
+                        {% elif payment.status == 'completed' %}
+                            <div class="alert alert-success mt-3">
+                                <i class="fas fa-check-circle me-2"></i>
+                                <strong>Payment Successful!</strong> Your booking has been confirmed and space has been reserved.
+                            </div>
+                            <div class="text-center mb-3">
+                                {% if payment.booking.receipt %}
+                                <div class="btn-group" role="group">
+                                    <a href="{% url 'receipts:detail' payment.booking.receipt.pk %}" class="btn btn-success">
+                                        <i class="fas fa-file-pdf me-2"></i>
+                                        View Receipt
+                                    </a>
+                                    <a href="{% url 'receipts:print' payment.booking.receipt.pk %}" class="btn btn-outline-success">
+                                        <i class="fas fa-print me-2"></i>
+                                        Print Receipt
+                                    </a>
+                                </div>
+                                {% endif %}
+                            </div>
+                            <div class="text-center">
+                                <a href="{% url 'bookings:detail' payment.booking.id %}" class="btn btn-primary">
+                                    <i class="fas fa-eye me-2"></i>
+                                    View Booking Details
+                                </a>
+                            </div>
+                        {% elif payment.status == 'failed' %}
+                            <div class="alert alert-danger mt-3">
+                                <i class="fas fa-times-circle me-2"></i>
+                                <strong>Payment Failed:</strong>
+                                {% if payment.error_message %}
+                                    {{ payment.error_message }}
+                                {% else %}
+                                    The payment could not be processed. Please try again.
+                                {% endif %}
+                            </div>
+                            <div class="text-center">
+                                <a href="{% url 'payments:initiate' payment.booking.id %}" class="btn btn-warning">
+                                    <i class="fas fa-redo me-2"></i>
+                                    Try Again
+                                </a>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if payment.status == 'processing' %}
+<script>
+    // CSRF token for AJAX requests
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    const csrftoken = getCookie('csrftoken');
+    const paymentId = '{{ payment.payment_id }}';
+    let checkCount = 0;
+    const maxChecks = 120; // Check for up to 20 minutes (120 * 10 seconds)
+
+    function checkPaymentStatus() {
+        checkCount++;
+        console.log('Checking payment status... (' + checkCount + ')');
+
+        fetch(`/payments/check-status/${paymentId}/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrftoken
+            },
+            body: JSON.stringify({})
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log('Payment status response:', data);
+            
+            if (data.is_completed) {
+                // Payment completed - show success message and redirect
+                document.getElementById('status-badge').innerHTML = '<span class="badge bg-success">Completed</span>';
+                document.getElementById('status-message').innerHTML = `
+                    <div class="alert alert-success mt-3">
+                        <i class="fas fa-check-circle me-2"></i>
+                        <strong>Payment Successful!</strong> Your booking has been confirmed and space has been reserved. 
+                        Your receipt is being generated...
+                    </div>
+                    <div class="text-center">
+                        <div class="spinner-border text-success" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
+                `;
+                
+                // Redirect to receipt after 2 seconds
+                setTimeout(() => {
+                    if (data.receipt_id) {
+                        window.location.href = `/receipts/${data.receipt_id}/`;
+                    } else {
+                        location.reload();
+                    }
+                }, 2000);
+            } else if (data.status === 'failed') {
+                // Payment failed
+                document.getElementById('status-badge').innerHTML = '<span class="badge bg-danger">Failed</span>';
+                document.getElementById('status-message').innerHTML = `
+                    <div class="alert alert-danger mt-3">
+                        <i class="fas fa-times-circle me-2"></i>
+                        <strong>Payment Failed:</strong> ${data.message}
+                    </div>
+                    <div class="text-center">
+                        <a href="/payments/initiate/${parseInt('{{ payment.booking.id }}')}/" class="btn btn-warning">
+                            <i class="fas fa-redo me-2"></i>
+                            Try Again
+                        </a>
+                    </div>
+                `;
+                clearInterval(checkInterval);
+            } else if (checkCount < maxChecks) {
+                // Still processing - update UI to show checking
+                console.log('Still processing... will check again');
+            } else {
+                // Max checks reached
+                document.getElementById('status-message').innerHTML += `
+                    <div class="alert alert-warning mt-3">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <strong>Taking longer than expected:</strong> We're still verifying your payment. Please check back in a few moments.
+                        <a href="javascript:location.reload()" class="btn btn-sm btn-warning float-end">Refresh</a>
+                    </div>
+                `;
+                clearInterval(checkInterval);
+            }
+        })
+        .catch(error => {
+            console.error('Error checking payment status:', error);
+        });
+    }
+
+    // Check payment status every 10 seconds
+    const checkInterval = setInterval(checkPaymentStatus, 10000);
+
+    // Also check immediately
+    checkPaymentStatus();
+
+    // Manual check button
+    document.addEventListener('DOMContentLoaded', function() {
+        // Add a refresh button for manual check
+        const messageDiv = document.getElementById('status-message');
+        if (messageDiv) {
+            const refreshBtn = document.createElement('button');
+            refreshBtn.className = 'btn btn-sm btn-outline-primary mt-2';
+            refreshBtn.innerHTML = '<i class="fas fa-sync me-1"></i>Check Now';
+            refreshBtn.onclick = checkPaymentStatus;
+            messageDiv.appendChild(refreshBtn);
+        }
+    });
+</script>
+{% endif %}
+{% endblock %}

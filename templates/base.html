@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="csrf-token" content="{{ csrf_token }}">
+  <title>{% block title %}DCWMS{% endblock %} | Digital Cereal Warehouse System</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --green-primary: #1e7e34;
+      --green-dark:    #155724;
+      --green-light:   #d4edda;
+      --amber:         #f0a500;
+      --amber-light:   #fff3cd;
+      --sidebar-w:     250px;
+      --topbar-h:      60px;
+    }
+    body { font-family: 'Inter', sans-serif; background: #f4f6f9; }
+    h1,h2,h3,h4,h5,h6,.brand { font-family: 'Nunito', sans-serif; }
+
+    /* ---- TOP BAR ---- */
+    .topbar {
+      position: fixed; top: 0; left: 0; right: 0; height: var(--topbar-h);
+      background: var(--green-primary); color: #fff; z-index: 1040;
+      display: flex; align-items: center; padding: 0 1rem; gap: .75rem;
+    }
+    .topbar .brand { font-weight: 800; font-size: 1.2rem; letter-spacing: -.5px; color: #fff; text-decoration: none; }
+    .topbar .brand span { color: var(--amber); }
+    .topbar-right { margin-left: auto; display: flex; align-items: center; gap: 1rem; }
+
+    /* ---- SIDEBAR ---- */
+    .sidebar {
+      position: fixed; top: var(--topbar-h); left: 0; bottom: 0;
+      width: var(--sidebar-w); background: #fff;
+      border-right: 1px solid #e9ecef; overflow-y: auto; z-index: 1030;
+      transition: transform .3s ease;
+    }
+    .sidebar .nav-label { font-size: .7rem; font-weight: 700; color: #adb5bd;
+      text-transform: uppercase; letter-spacing: 1px; padding: 1.2rem 1rem .4rem; }
+    .sidebar .nav-link {
+      color: #495057; padding: .6rem 1rem; display: flex; align-items: center;
+      gap: .65rem; border-radius: 8px; margin: 1px 8px; font-size: .9rem; font-weight: 500;
+    }
+    .sidebar .nav-link:hover, .sidebar .nav-link.active {
+      background: var(--green-light); color: var(--green-dark); font-weight: 700;
+    }
+    .sidebar .nav-link i { font-size: 1.1rem; width: 22px; text-align: center; }
+
+    /* ---- MAIN ---- */
+    .main-content {
+      margin-left: var(--sidebar-w); padding-top: calc(var(--topbar-h) + 1.5rem);
+      padding-right: 1.5rem; padding-left: 1.5rem; padding-bottom: 2rem; min-height: 100vh;
+    }
+
+    /* ---- CARDS ---- */
+    .stat-card {
+      background: #fff; border-radius: 12px; padding: 1.25rem;
+      border: 1px solid #e9ecef; box-shadow: 0 1px 4px rgba(0,0,0,.05);
+    }
+    .stat-card .icon { width: 48px; height: 48px; border-radius: 10px;
+      display: flex; align-items: center; justify-content: center; font-size: 1.4rem; }
+    .stat-card .number { font-size: 1.8rem; font-weight: 800; font-family: 'Nunito', sans-serif; }
+    .stat-card .label { font-size: .8rem; color: #6c757d; }
+
+    .card { border: 1px solid #e9ecef; border-radius: 12px; box-shadow: 0 1px 4px rgba(0,0,0,.04); }
+    .card-header { background: #fff; border-bottom: 1px solid #e9ecef; font-weight: 700; border-radius: 12px 12px 0 0 !important; }
+
+    /* ---- BADGES & STATUS ---- */
+    .badge-pending   { background: #fff3cd; color: #856404; }
+    .badge-approved  { background: #d4edda; color: #155724; }
+    .badge-rejected  { background: #f8d7da; color: #721c24; }
+    .badge-completed { background: #cce5ff; color: #004085; }
+    .badge-cancelled { background: #e2e3e5; color: #383d41; }
+
+    /* ---- CAPACITY BAR ---- */
+    .capacity-bar { height: 8px; border-radius: 4px; background: #e9ecef; }
+    .capacity-fill { height: 100%; border-radius: 4px; transition: width .6s; }
+
+    /* ---- BUTTONS ---- */
+    .btn-green { background: var(--green-primary); color: #fff; border: none; }
+    .btn-green:hover { background: var(--green-dark); color: #fff; }
+    .btn-amber { background: var(--amber); color: #fff; border: none; }
+    .btn-amber:hover { background: #d4920a; color: #fff; }
+
+    /* ---- ALERTS ---- */
+    .alert { border-radius: 10px; border: none; }
+
+    /* ---- TABLE ---- */
+    .table th { font-size: .8rem; text-transform: uppercase; letter-spacing: .5px; color: #6c757d; }
+
+    /* ---- MOBILE ---- */
+    @media (max-width: 768px) {
+      .sidebar { transform: translateX(-100%); }
+      .sidebar.open { transform: translateX(0); }
+      .main-content { margin-left: 0; padding: calc(var(--topbar-h) + 1rem) .75rem 2rem; }
+      .topbar .btn-toggle { display: flex !important; }
+    }
+    .btn-toggle { display: none; background: none; border: none; color: #fff; font-size: 1.4rem; }
+
+    /* ---- RECEIPT STYLES ---- */
+    .receipt-box {
+      border: 2px solid var(--green-primary); border-radius: 12px; overflow: hidden;
+    }
+    .receipt-header {
+      background: var(--green-primary); color: #fff; padding: 1.5rem; text-align: center;
+    }
+    .receipt-body { padding: 1.5rem; }
+    .receipt-field { display: flex; justify-content: space-between; padding: .4rem 0;
+      border-bottom: 1px dashed #dee2e6; }
+    .receipt-field:last-child { border: none; }
+    .receipt-field .label { color: #6c757d; font-size: .85rem; }
+    .receipt-field .value { font-weight: 600; }
+
+    /* ---- WAREHOUSE CARD ---- */
+    .warehouse-card { transition: transform .2s, box-shadow .2s; cursor: pointer; }
+    .warehouse-card:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(0,0,0,.1); }
+    .cert-badge { font-size: .7rem; padding: .25rem .5rem; border-radius: 20px;
+      background: var(--green-light); color: var(--green-dark); font-weight: 700; }
+
+    /* ---- FORM STYLES ---- */
+    .form-control, .form-select {
+      border-radius: 8px; border: 1px solid #dee2e6; padding: .55rem .85rem; font-size: .9rem;
+    }
+    .form-control:focus, .form-select:focus {
+      border-color: var(--green-primary); box-shadow: 0 0 0 3px rgba(30,126,52,.15);
+    }
+    .form-label { font-weight: 600; font-size: .85rem; margin-bottom: .3rem; }
+    .form-section { background: #fff; border-radius: 12px; padding: 1.5rem; border: 1px solid #e9ecef; margin-bottom: 1.5rem; }
+    .form-section-title { font-size: 1rem; font-weight: 700; color: var(--green-dark);
+      margin-bottom: 1rem; padding-bottom: .5rem; border-bottom: 2px solid var(--green-light); }
+  </style>
+  {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <button class="btn-toggle" id="sidebarToggle"><i class="bi bi-list"></i></button>
+  <a href="{% url 'dashboard:home' %}" class="brand">🌾 DC<span>WMS</span></a>
+  <div class="topbar-right">
+    {% if user.is_authenticated %}
+      <span class="d-none d-md-inline" style="font-size:.85rem;">
+        <i class="bi bi-person-circle me-1"></i>{{ user.get_full_name|default:user.username }}
+        <span class="badge ms-1" style="background:var(--amber);font-size:.7rem;">{{ user.get_role_display }}</span>
+      </span>
+      <a href="{% url 'accounts:logout' %}" class="btn btn-sm btn-outline-light">
+        <i class="bi bi-box-arrow-right"></i> <span class="d-none d-md-inline">Logout</span>
+      </a>
+    {% else %}
+      <a href="{% url 'accounts:login' %}" class="btn btn-sm btn-outline-light">Login</a>
+    {% endif %}
+  </div>
+</div>
+
+<!-- SIDEBAR -->
+{% if user.is_authenticated %}
+<nav class="sidebar" id="sidebar">
+  <div class="p-3 mt-1">
+    <div style="font-size:.8rem;color:#6c757d;">Signed in as</div>
+    <div style="font-weight:700;font-size:.95rem;">{{ user.get_full_name|default:user.username }}</div>
+    <div style="font-size:.75rem;color:var(--green-primary);font-weight:600;">{{ user.get_role_display }}</div>
+  </div>
+
+  <div class="nav-label">Main</div>
+  <a href="{% url 'dashboard:home' %}" class="nav-link {% if request.resolver_match.namespace == 'dashboard' %}active{% endif %}">
+    <i class="bi bi-speedometer2"></i> Dashboard
+  </a>
+
+  {% if user.is_farmer or user.is_admin_user %}
+  <div class="nav-label">Find & Book</div>
+  <a href="{% url 'warehouses:finder' %}" class="nav-link {% if request.resolver_match.namespace == 'warehouses' and 'finder' in request.path %}active{% endif %}">
+    <i class="bi bi-search"></i> Find Warehouses
+  </a>
+  <a href="{% url 'bookings:list' %}" class="nav-link {% if request.resolver_match.namespace == 'bookings' %}active{% endif %}">
+    <i class="bi bi-calendar-check"></i> My Bookings
+  </a>
+  <a href="{% url 'receipts:list' %}" class="nav-link {% if request.resolver_match.namespace == 'receipts' %}active{% endif %}">
+    <i class="bi bi-file-earmark-text"></i> My Receipts
+  </a>
+  <a href="{% url 'inventory:list' %}" class="nav-link {% if request.resolver_match.namespace == 'inventory' %}active{% endif %}">
+    <i class="bi bi-box-seam"></i> My Storage
+  </a>
+  <a href="{% url 'withdrawals:list' %}" class="nav-link {% if request.resolver_match.namespace == 'withdrawals' %}active{% endif %}">
+    <i class="bi bi-arrow-down-circle"></i> Withdrawals
+  </a>
+  {% endif %}
+
+  {% if user.is_operator or user.is_admin_user %}
+  <div class="nav-label">Operator Panel</div>
+  <a href="{% url 'warehouses:my_warehouses' %}" class="nav-link">
+    <i class="bi bi-building"></i> My Warehouses
+  </a>
+  <a href="{% url 'warehouses:create' %}" class="nav-link">
+    <i class="bi bi-plus-circle"></i> Add Warehouse
+  </a>
+  <a href="{% url 'bookings:list' %}" class="nav-link">
+    <i class="bi bi-clipboard-check"></i> Booking Requests
+  </a>
+  <a href="{% url 'withdrawals:list' %}" class="nav-link">
+    <i class="bi bi-truck"></i> Withdrawal Requests
+  </a>
+  <a href="{% url 'inventory:list' %}" class="nav-link">
+    <i class="bi bi-bar-chart-line"></i> Inventory
+  </a>
+  {% endif %}
+
+  <div class="nav-label">More</div>
+  <a href="{% url 'reports:home' %}" class="nav-link {% if request.resolver_match.namespace == 'reports' %}active{% endif %}">
+    <i class="bi bi-graph-up"></i> Reports & Analytics
+  </a>
+  <a href="{% url 'receipts:verify' %}" class="nav-link">
+    <i class="bi bi-shield-check"></i> Verify Receipt
+  </a>
+  <a href="{% url 'accounts:profile' %}" class="nav-link">
+    <i class="bi bi-person"></i> My Profile
+  </a>
+</nav>
+{% endif %}
+
+<!-- MAIN CONTENT -->
+<main class="main-content {% if not user.is_authenticated %}ms-0{% endif %}">
+  <!-- Messages -->
+  {% if messages %}
+    <div class="mb-3">
+      {% for msg in messages %}
+        <div class="alert alert-{{ msg.tags|default:'info' }} alert-dismissible fade show" role="alert">
+          {{ msg }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  {% block content %}{% endblock %}
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  // Sidebar toggle for mobile
+  document.getElementById('sidebarToggle')?.addEventListener('click', () => {
+    document.getElementById('sidebar')?.classList.toggle('open');
+  });
+  // Close sidebar on link click (mobile)
+  document.querySelectorAll('.sidebar .nav-link').forEach(link => {
+    link.addEventListener('click', () => {
+      if (window.innerWidth < 768) document.getElementById('sidebar')?.classList.remove('open');
+    });
+  });
+
+  // Loading spinner for forms
+  document.addEventListener('DOMContentLoaded', function() {
+    const forms = document.querySelectorAll('form');
+    forms.forEach(form => {
+      form.addEventListener('submit', function() {
+        const submitBtn = form.querySelector('button[type="submit"], input[type="submit"]');
+        if (submitBtn) {
+          submitBtn.disabled = true;
+          submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Processing...';
+        }
+      });
+    });
+  });
+</script>
+{% block extra_js %}{% endblock %}
+</body>
+</html>

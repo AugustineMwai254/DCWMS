@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+
+{% block title %}Print Receipt {{ receipt.receipt_code }}{% endblock %}
+
+{% block content %}
+<div class="p-4" style="max-width:900px;margin:auto;">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h2 style="font-family:'Nunito',sans-serif;font-weight:800;">Digital Warehouse Receipt</h2>
+      <p class="text-muted mb-0">Receipt No: <strong>{{ receipt.receipt_code }}</strong></p>
+      <p class="text-muted mb-0">Issued: {{ receipt.issued_at|date:"d M Y, H:i" }}</p>
+    </div>
+    <div class="text-end">
+      <p class="mb-1" style="font-size:.95rem;">Verified: <strong>{{ receipt.is_valid|yesno:"Yes,No" }}</strong></p>
+      <p class="mb-0" style="font-size:.9rem;">Warehouse: {{ receipt.warehouse.name }}</p>
+      <p class="mb-0" style="font-size:.9rem;">County: {{ receipt.warehouse.county }}</p>
+    </div>
+  </div>
+
+  <div style="border:1px solid #dee2e6;border-radius:12px;overflow:hidden;">
+    <div style="background:#f8f9fa;padding:1rem;">
+      <h5 style="margin:0;font-weight:700;letter-spacing:.5px;">Depositor Details</h5>
+    </div>
+    <div style="padding:1rem;display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+      <div><strong>Name</strong><div>{{ receipt.farmer.get_full_name }}</div></div>
+      <div><strong>ID / Phone</strong><div>{{ receipt.farmer.national_id|default:"-" }} / {{ receipt.farmer.phone_number }}</div></div>
+      <div><strong>County</strong><div>{{ receipt.farmer.county }}</div></div>
+      <div><strong>Sub-county</strong><div>{{ receipt.farmer.sub_county }}</div></div>
+    </div>
+  </div>
+
+  <div style="border:1px solid #dee2e6;border-radius:12px;overflow:hidden;margin-top:1rem;">
+    <div style="background:#f8f9fa;padding:1rem;">
+      <h5 style="margin:0;font-weight:700;letter-spacing:.5px;">Receipt Details</h5>
+    </div>
+    <div style="padding:1rem;display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+      <div><strong>Warehouse Name</strong><div>{{ receipt.warehouse.name }}</div></div>
+      <div><strong>Location</strong><div>{{ receipt.warehouse.sub_county }}, {{ receipt.warehouse.county }}</div></div>
+      <div><strong>Registration #</strong><div>{{ receipt.warehouse.registration_number }}</div></div>
+      <div><strong>Certification</strong><div>{{ receipt.warehouse.get_certification_status_display }}</div></div>
+      <div><strong>Cereal Type</strong><div class="text-capitalize">{{ receipt.cereal_type }}</div></div>
+      <div><strong>Quantity</strong><div>{{ receipt.quantity_bags }} bags ({{ receipt.quantity_mt }} MT)</div></div>
+      <div><strong>Storage Period</strong><div>{{ receipt.storage_start_date|date:"d M Y" }} - {{ receipt.storage_end_date|date:"d M Y" }}</div></div>
+      <div><strong>Estimated Fee</strong><div>KES {{ receipt.total_fee_kes|floatformat:2 }}</div></div>
+      <div><strong>Booking Ref</strong><div>{{ receipt.booking.booking_ref_human }}</div></div>
+      <div><strong>Issued By</strong><div>{% if receipt.issued_by %}{{ receipt.issued_by.get_full_name|default:receipt.issued_by.username }}{% else %}System{% endif %}</div></div>
+    </div>
+  </div>
+
+  <div style="margin-top:1rem;padding:1rem;border:1px solid #dee2e6;border-radius:12px;background:#f8f9fa;">
+    <div class="d-flex justify-content-between align-items-center">
+      <div style="font-size:.8rem;color:#495057;line-height:1.5;">Verify this receipt online at <strong>{{ request.get_host }}/receipts/verify/?code={{ receipt.receipt_code }}</strong> or scan the receipt code if printed.</div>
+      <div>
+        <img src="{% url 'receipts:qr_code' receipt.pk %}" alt="QR Code" style="width:80px;height:80px;">
+      </div>
+    </div>
+  </div>
+
+  <div class="text-end mt-4">
+    <button class="btn btn-primary" onclick="window.print();"><i class="bi bi-printer me-1"></i>Print</button>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+@media print {
+  body { background: #fff !important; }
+  .btn { display: none !important; }
+  .breadcrumb, .topbar, .sidebar, .nav-link, .footer, .btn { display: none !important; }
+  .container, .content, .app-content { margin: 0 !important; padding: 0 !important; }
+}
+</style>
+{% endblock %}

@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title mb-0">
+                        <i class="fas fa-mobile-alt text-success me-2"></i>
+                        Complete Payment for Booking {{ booking.booking_ref_human }}
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <h5>Booking Details</h5>
+                        <p><strong>Warehouse:</strong> {{ booking.warehouse.name }}</p>
+                        <p><strong>Cereal Type:</strong> {{ booking.get_cereal_type_display }}</p>
+                        <p><strong>Quantity:</strong> {{ booking.quantity_bags }} bags ({{ booking.quantity_mt }} MT)</p>
+                        <p><strong>Duration:</strong> {{ booking.storage_start_date }} to {{ booking.storage_end_date }}</p>
+                        <p><strong>Total Cost:</strong> KES {{ booking.total_fee_kes|floatformat:2 }}</p>
+                    </div>
+
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="{{ form.phone_number.id_for_label }}" class="form-label">
+                                {{ form.phone_number.label }}
+                            </label>
+                            {{ form.phone_number }}
+                            {% if form.phone_number.help_text %}
+                                <div class="form-text">{{ form.phone_number.help_text }}</div>
+                            {% endif %}
+                            {% if form.phone_number.errors %}
+                                <div class="text-danger">{{ form.phone_number.errors }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="alert alert-warning">
+                            <i class="fas fa-info-circle me-2"></i>
+                            <strong>Important:</strong> You will receive an MPesa prompt on your phone. Enter your MPesa PIN to complete the payment.
+                        </div>
+
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-success btn-lg">
+                                <i class="fas fa-mobile-alt me-2"></i>
+                                Pay with MPesa
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

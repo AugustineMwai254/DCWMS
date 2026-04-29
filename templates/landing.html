@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DCWMS - Digital Cereal Warehouse Management System</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --green-primary: #1e7e34;
+      --green-dark: #155724;
+      --green-light: #d4edda;
+      --amber: #f0a500;
+      --amber-light: #fff3cd;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #fff;
+      color: #333;
+      line-height: 1.6;
+    }
+
+    h1, h2, h3, h4, h5, h6 {
+      font-family: 'Nunito', sans-serif;
+      font-weight: 700;
+    }
+
+    /* ---- NAVIGATION ---- */
+    .navbar-landing {
+      background: #fff;
+      border-bottom: 1px solid #e9ecef;
+      padding: 0.75rem 0;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    }
+
+    .navbar-brand {
+      font-size: 1.4rem;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      color: var(--green-primary) !important;
+    }
+
+    .navbar-brand span {
+      color: var(--amber);
+    }
+
+    .navbar-nav .nav-link {
+      font-weight: 500;
+      color: #495057 !important;
+      margin: 0 0.5rem;
+      transition: color 0.3s;
+    }
+
+    .navbar-nav .nav-link:hover {
+      color: var(--green-primary) !important;
+    }
+
+    /* ---- HERO SECTION ---- */
+    .hero {
+      background: linear-gradient(135deg, var(--green-primary) 0%, #0d5c1f 100%);
+      color: #fff;
+      padding: 6rem 0;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      right: -10%;
+      width: 600px;
+      height: 600px;
+      background: rgba(240, 165, 0, 0.05);
+      border-radius: 50%;
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 2;
+      max-width: 700px;
+      margin: 0 auto;
+    }
+
+    .hero h1 {
+      font-size: 3.5rem;
+      font-weight: 800;
+      margin-bottom: 1.5rem;
+      line-height: 1.2;
+    }
+
+    .hero p {
+      font-size: 1.25rem;
+      margin-bottom: 2rem;
+      opacity: 0.95;
+    }
+
+    .hero .btn {
+      padding: 0.75rem 2rem;
+      font-weight: 600;
+      font-size: 1rem;
+      margin: 0.5rem;
+      border-radius: 8px;
+      transition: all 0.3s;
+    }
+
+    .btn-hero-primary {
+      background: var(--amber);
+      color: #fff;
+      border: none;
+    }
+
+    .btn-hero-primary:hover {
+      background: #d4920a;
+      color: #fff;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 16px rgba(240, 165, 0, 0.3);
+    }
+
+    .btn-hero-secondary {
+      background: transparent;
+      color: #fff;
+      border: 2px solid #fff;
+    }
+
+    .btn-hero-secondary:hover {
+      background: #fff;
+      color: var(--green-primary);
+      transform: translateY(-2px);
+    }
+
+    /* ---- FEATURES SECTION ---- */
+    .features {
+      padding: 5rem 0;
+      background: #f4f6f9;
+    }
+
+    .section-title {
+      font-size: 2.5rem;
+      font-weight: 800;
+      margin-bottom: 1rem;
+      color: var(--green-primary);
+    }
+
+    .section-subtitle {
+      font-size: 1.1rem;
+      color: #6c757d;
+      margin-bottom: 3rem;
+      max-width: 600px;
+    }
+
+    .feature-card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 2rem;
+      text-align: center;
+      border: 1px solid #e9ecef;
+      transition: all 0.3s;
+      height: 100%;
+    }
+
+    .feature-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 12px 24px rgba(30, 126, 52, 0.12);
+    }
+
+    .feature-icon {
+      width: 70px;
+      height: 70px;
+      background: var(--green-light);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      color: var(--green-primary);
+      margin: 0 auto 1.5rem;
+    }
+
+    .feature-card h4 {
+      font-size: 1.3rem;
+      margin-bottom: 1rem;
+      color: #1a1a1a;
+    }
+
+    .feature-card p {
+      color: #6c757d;
+      font-size: 0.95rem;
+    }
+
+    /* ---- BENEFITS SECTION ---- */
+    .benefits {
+      padding: 5rem 0;
+      background: #fff;
+    }
+
+    .benefit-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 3rem;
+      align-items: center;
+      margin-bottom: 4rem;
+    }
+
+    .benefit-row.reverse {
+      direction: rtl;
+    }
+
+    .benefit-row.reverse > * {
+      direction: ltr;
+    }
+
+    .benefit-image {
+      text-align: center;
+    }
+
+    .benefit-image img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 12px;
+    }
+
+    .benefit-content h3 {
+      font-size: 2rem;
+      margin-bottom: 1rem;
+      color: var(--green-primary);
+    }
+
+    .benefit-content ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    .benefit-content li {
+      padding: 0.75rem 0 0.75rem 2.5rem;
+      position: relative;
+      color: #495057;
+      font-weight: 500;
+    }
+
+    .benefit-content li::before {
+      content: '\2713';
+      position: absolute;
+      left: 0;
+      color: var(--green-primary);
+      font-weight: 800;
+      font-size: 1.2rem;
+    }
+
+    /* ---- STATS SECTION ---- */
+    .stats {
+      background: var(--green-primary);
+      color: #fff;
+      padding: 4rem 0;
+    }
+
+    .stat-box {
+      text-align: center;
+      padding: 1.5rem;
+    }
+
+    .stat-number {
+      font-size: 3rem;
+      font-weight: 800;
+      margin-bottom: 0.5rem;
+    }
+
+    .stat-label {
+      font-size: 1rem;
+      opacity: 0.95;
+    }
+
+    /* ---- USER TYPES SECTION ---- */
+    .user-types {
+      padding: 5rem 0;
+      background: #f4f6f9;
+    }
+
+    .user-type-card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 2.5rem;
+      text-align: center;
+      border: 2px solid #e9ecef;
+      transition: all 0.3s;
+    }
+
+    .user-type-card:hover {
+      border-color: var(--green-primary);
+      box-shadow: 0 12px 24px rgba(30, 126, 52, 0.12);
+    }
+
+    .user-type-icon {
+      width: 80px;
+      height: 80px;
+      background: linear-gradient(135deg, var(--green-light), var(--amber-light));
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.5rem;
+      margin: 0 auto 1.5rem;
+    }
+
+    .user-type-card h4 {
+      font-size: 1.3rem;
+      margin-bottom: 1rem;
+      color: var(--green-primary);
+    }
+
+    .user-type-card p {
+      color: #6c757d;
+      margin-bottom: 1.5rem;
+    }
+
+    .user-type-card a {
+      color: var(--green-primary);
+      text-decoration: none;
+      font-weight: 600;
+      transition: color 0.3s;
+    }
+
+    .user-type-card a:hover {
+      color: var(--amber);
+    }
+
+    /* ---- CTA SECTION ---- */
+    .cta {
+      background: linear-gradient(135deg, var(--green-primary) 0%, #0d5c1f 100%);
+      color: #fff;
+      padding: 4rem 0;
+      text-align: center;
+    }
+
+    .cta h2 {
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .cta p {
+      font-size: 1.1rem;
+      margin-bottom: 2rem;
+      opacity: 0.95;
+    }
+
+    /* ---- FOOTER ---- */
+    .footer {
+      background: #1a1a1a;
+      color: #e0e0e0;
+      padding: 3rem 0 1rem;
+      margin-top: 3rem;
+    }
+
+    .footer-section h5 {
+      color: #fff;
+      margin-bottom: 1rem;
+      font-weight: 600;
+    }
+
+    .footer-section ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    .footer-section a {
+      color: #b0b0b0;
+      text-decoration: none;
+      font-size: 0.9rem;
+      transition: color 0.3s;
+    }
+
+    .footer-section a:hover {
+      color: var(--amber);
+    }
+
+    .footer-bottom {
+      border-top: 1px solid #333;
+      margin-top: 2rem;
+      padding-top: 2rem;
+      text-align: center;
+      font-size: 0.9rem;
+      color: #888;
+    }
+
+    /* ---- RESPONSIVE ---- */
+    @media (max-width: 768px) {
+      .hero {
+        padding: 4rem 0;
+      }
+
+      .hero h1 {
+        font-size: 2.2rem;
+      }
+
+      .hero p {
+        font-size: 1rem;
+      }
+
+      .section-title {
+        font-size: 1.8rem;
+      }
+
+      .benefit-row,
+      .benefit-row.reverse {
+        grid-template-columns: 1fr;
+        direction: ltr;
+      }
+
+      .benefit-row.reverse > * {
+        direction: ltr;
+      }
+
+      .stat-number {
+        font-size: 2rem;
+      }
+
+      .navbar {
+        padding: 0.5rem 0 !important;
+      }
+
+      .navbar-collapse {
+        background: #fff;
+        margin-top: 0.5rem;
+        border-radius: 8px;
+        border: 1px solid #e9ecef;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- NAVIGATION -->
+  <nav class="navbar navbar-expand-lg navbar-landing">
+    <div class="container-lg">
+      <a class="navbar-brand" href="#">
+        <i class="bi bi-boxes"></i> DCWMS <span>PRO</span>
+      </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item"><a class="nav-link" href="#features">Features</a></li>
+          <li class="nav-item"><a class="nav-link" href="#benefits">Benefits</a></li>
+          <li class="nav-item"><a class="nav-link" href="#user-types">For Users</a></li>
+          <li class="nav-item"><a class="nav-link" href="#contact">Contact</a></li>
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'accounts:login' %}" style="color: var(--green-primary) !important; font-weight: 600;">Login</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- HERO SECTION -->
+  <section class="hero">
+    <div class="container-lg">
+      <div class="hero-content">
+        <h1>Digital Cereal Warehouse Management</h1>
+        <p>Streamline your warehouse operations, automate approvals, and manage inventory with ease using modern technology.</p>
+        <div>
+          <a href="{% url 'accounts:register_farmer' %}" class="btn btn-hero-primary">
+            <i class="bi bi-person-plus"></i> Get Started as Farmer
+          </a>
+          <a href="{% url 'accounts:register_operator' %}" class="btn btn-hero-secondary">
+            <i class="bi bi-briefcase"></i> Register as Operator
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FEATURES SECTION -->
+  <section class="features" id="features">
+    <div class="container-lg">
+      <div class="text-center mb-5">
+        <h2 class="section-title">Powerful Features</h2>
+        <p class="section-subtitle">Everything you need to manage your warehouse efficiently</p>
+      </div>
+
+      <div class="row g-4">
+        <div class="col-md-6 col-lg-4">
+          <div class="feature-card">
+            <div class="feature-icon"><i class="bi bi-calculator"></i></div>
+            <h4>Smart Booking System</h4>
+            <p>Reserve warehouse space with instant availability checking and real-time capacity management.</p>
+          </div>
+        </div>
+
+        <div class="col-md-6 col-lg-4">
+          <div class="feature-card">
+            <div class="feature-icon"><i class="bi bi-credit-card"></i></div>
+            <h4>MPesa Payments</h4>
+            <p>Secure payment integration with automatic booking confirmation upon payment completion.</p>
+          </div>
+        </div>
+
+        <div class="col-md-6 col-lg-4">
+          <div class="feature-card">
+            <div class="feature-icon"><i class="bi bi-receipt"></i></div>
+            <h4>Digital Receipts</h4>
+            <p>Automatic receipt generation with download, print, and QR code functionality for verification.</p>
+          </div>
+        </div>
+
+        <div class="col-md-6 col-lg-4">
+          <div class="feature-card">
+            <div class="feature-icon"><i class="bi bi-graph-up"></i></div>
+            <h4>Real-time Analytics</h4>
+            <p>Monitor inventory levels, bookings, and withdrawals with comprehensive dashboard reports.</p>
+          </div>
+        </div>
+
+        <div class="col-md-6 col-lg-4">
+          <div class="feature-card">
+            <div class="feature-icon"><i class="bi bi-box-seam"></i></div>
+            <h4>Inventory Management</h4>
+            <p>Track cereal stocks, manage warehouse capacity, and automate inventory updates.</p>
+          </div>
+        </div>
+
+        <div class="col-md-6 col-lg-4">
+          <div class="feature-card">
+            <div class="feature-icon"><i class="bi bi-shield-check"></i></div>
+            <h4>Secure & Reliable</h4>
+            <p>Enterprise-grade security with role-based access control and audit trails.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- BENEFITS SECTION -->
+  <section class="benefits" id="benefits">
+    <div class="container-lg">
+      <div class="benefit-row">
+        <div class="benefit-content">
+          <h3><i class="bi bi-check-circle"></i> For Farmers</h3>
+          <ul>
+            <li>Easy online booking without paperwork</li>
+            <li>Secure MPesa payment processing</li>
+            <li>Instant confirmation & receipt</li>
+            <li>Track storage usage in real-time</li>
+            <li>Schedule withdrawals at convenience</li>
+            <li>Access historical transaction records</li>
+          </ul>
+        </div>
+        <div class="benefit-image">
+          <div style="background: linear-gradient(135deg, var(--green-light), var(--amber-light)); border-radius: 12px; padding: 3rem; text-align: center; color: var(--green-primary);">
+            <i class="bi bi-person-fill" style="font-size: 4rem;"></i>
+            <p style="margin-top: 1rem; font-weight: 600;">Farmer Portal</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="benefit-row reverse">
+        <div class="benefit-content">
+          <h3><i class="bi bi-check-circle"></i> For Operators</h3>
+          <ul>
+            <li>Manage multiple warehouses</li>
+            <li>Automated approval workflows</li>
+            <li>Real-time inventory tracking</li>
+            <li>Detailed financial reports</li>
+            <li>Withdrawal scheduling & management</li>
+            <li>Complete audit trail</li>
+          </ul>
+        </div>
+        <div class="benefit-image">
+          <div style="background: linear-gradient(135deg, var(--amber-light), var(--green-light)); border-radius: 12px; padding: 3rem; text-align: center; color: var(--amber);">
+            <i class="bi bi-briefcase-fill" style="font-size: 4rem;"></i>
+            <p style="margin-top: 1rem; font-weight: 600;">Operator Dashboard</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- STATS SECTION -->
+  <section class="stats">
+    <div class="container-lg">
+      <div class="row">
+        <div class="col-md-3 col-6">
+          <div class="stat-box">
+            <div class="stat-number">500+</div>
+            <div class="stat-label">Active Users</div>
+          </div>
+        </div>
+        <div class="col-md-3 col-6">
+          <div class="stat-box">
+            <div class="stat-number">2.5M</div>
+            <div class="stat-label">Bags Stored</div>
+          </div>
+        </div>
+        <div class="col-md-3 col-6">
+          <div class="stat-box">
+            <div class="stat-number">50+</div>
+            <div class="stat-label">Warehouses</div>
+          </div>
+        </div>
+        <div class="col-md-3 col-6">
+          <div class="stat-box">
+            <div class="stat-number">99.8%</div>
+            <div class="stat-label">Uptime</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- USER TYPES SECTION -->
+  <section class="user-types" id="user-types">
+    <div class="container-lg">
+      <div class="text-center mb-5">
+        <h2 class="section-title">Choose Your Role</h2>
+        <p class="section-subtitle">Get started in just a few minutes</p>
+      </div>
+
+      <div class="row g-4">
+        <div class="col-md-6 col-lg-4">
+          <div class="user-type-card">
+            <div class="user-type-icon"><i class="bi bi-person-badge"></i></div>
+            <h4>Farmer</h4>
+            <p>Book warehouse space, make payments, store cereals, and schedule withdrawals with ease.</p>
+            <a href="{% url 'accounts:register_farmer' %}">Register as Farmer <i class="bi bi-arrow-right"></i></a>
+          </div>
+        </div>
+
+        <div class="col-md-6 col-lg-4">
+          <div class="user-type-card">
+            <div class="user-type-icon"><i class="bi bi-building"></i></div>
+            <h4>Warehouse Operator</h4>
+            <p>Manage warehouses, track inventory, automate approvals, and generate reports.</p>
+            <a href="{% url 'accounts:register_operator' %}">Register as Operator <i class="bi bi-arrow-right"></i></a>
+          </div>
+        </div>
+
+        <div class="col-md-6 col-lg-4">
+          <div class="user-type-card">
+            <div class="user-type-icon"><i class="bi bi-lock"></i></div>
+            <h4>Already a Member?</h4>
+            <p>Access your account, view bookings, manage inventory, and track transactions.</p>
+            <a href="{% url 'accounts:login' %}">Login Here <i class="bi bi-arrow-right"></i></a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA SECTION -->
+  <section class="cta" id="contact">
+    <div class="container-lg">
+      <h2>Ready to Transform Your Warehouse?</h2>
+      <p>Join hundreds of farmers and operators already using DCWMS</p>
+      <div>
+        <a href="{% url 'accounts:register_farmer' %}" class="btn btn-hero-primary" style="padding: 0.75rem 2.5rem; font-size: 1.05rem;">
+          <i class="bi bi-rocket"></i> Start Free Today
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="container-lg">
+      <div class="row g-4 mb-3">
+        <div class="col-md-3">
+          <div class="footer-section">
+            <h5><i class="bi bi-boxes"></i> DCWMS</h5>
+            <p style="font-size: 0.9rem; color: #888; margin-top: 0.5rem;">Digital Cereal Warehouse Management System for modern agriculture.</p>
+          </div>
+        </div>
+
+        <div class="col-md-3">
+          <div class="footer-section">
+            <h5>Product</h5>
+            <ul>
+              <li><a href="#features">Features</a></li>
+              <li><a href="#benefits">Benefits</a></li>
+              <li><a href="#user-types">Pricing</a></li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="col-md-3">
+          <div class="footer-section">
+            <h5>Company</h5>
+            <ul>
+              <li><a href="#contact">Contact</a></li>
+              <li><a href="#">Support</a></li>
+              <li><a href="#">Documentation</a></li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="col-md-3">
+          <div class="footer-section">
+            <h5>Connect</h5>
+            <ul>
+              <li><a href="#"><i class="bi bi-twitter"></i> Twitter</a></li>
+              <li><a href="#"><i class="bi bi-facebook"></i> Facebook</a></li>
+              <li><a href="#"><i class="bi bi-linkedin"></i> LinkedIn</a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <p>&copy; 2026 DCWMS. All rights reserved. | <a href="#" style="color: #b0b0b0;">Privacy Policy</a> | <a href="#" style="color: #b0b0b0;">Terms of Service</a></p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    // Smooth scroll for navigation links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        const target = document.querySelector(this.getAttribute('href'));
+        if (target) {
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      });
+    });
+  </script>
+</body>
+</html>

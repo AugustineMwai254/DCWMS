@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+{% block title %}Inventory Detail{% endblock %}
+{% block content %}
+<div class="mb-4">
+  <nav aria-label="breadcrumb"><ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="{% url 'inventory:list' %}">Inventory</a></li>
+    <li class="breadcrumb-item active">{{ record.cereal_type|title }} @ {{ record.warehouse.name }}</li>
+  </ol></nav>
+  <h4 class="mb-0" style="font-family:'Nunito',sans-serif;font-weight:800;">Inventory Record</h4>
+</div>
+<div class="row g-4">
+  <div class="col-md-6">
+    <div class="card mb-3">
+      <div class="card-header"><i class="bi bi-box-seam me-2"></i>Storage Details</div>
+      <div class="card-body" style="font-size:.9rem;">
+        <div class="d-flex justify-content-between py-2 border-bottom"><span class="text-muted">Farmer</span><span class="fw-semibold">{{ record.farmer.get_full_name }}</span></div>
+        <div class="d-flex justify-content-between py-2 border-bottom"><span class="text-muted">Warehouse</span><span class="fw-semibold">{{ record.warehouse.name }}</span></div>
+        <div class="d-flex justify-content-between py-2 border-bottom"><span class="text-muted">Cereal Type</span><span class="fw-semibold text-capitalize">{{ record.cereal_type }}</span></div>
+        <div class="d-flex justify-content-between py-2 border-bottom"><span class="text-muted">Original Quantity</span><span class="fw-semibold">{{ record.quantity_bags }} bags ({{ record.quantity_mt }} MT)</span></div>
+        <div class="d-flex justify-content-between py-2 border-bottom">
+          <span class="text-muted">Remaining</span>
+          <span class="fw-bold" style="color:#1e7e34;font-size:1.05rem;">{{ record.remaining_bags }} bags ({{ record.remaining_mt }} MT)</span>
+        </div>
+        <div class="d-flex justify-content-between py-2 border-bottom"><span class="text-muted">Status</span>
+          <span class="badge {% if record.status == 'stored' %}badge-approved{% else %}badge-completed{% endif %} rounded-pill">{{ record.get_status_display }}</span>
+        </div>
+        <div class="d-flex justify-content-between py-2"><span class="text-muted">Date Stored</span><span class="fw-semibold">{{ record.date_stored|date:"d M Y" }}</span></div>
+      </div>
+    </div>
+    {% if user.is_farmer and record.remaining_bags > 0 %}
+    <a href="{% url 'withdrawals:schedule' record.pk %}" class="btn btn-warning w-100">
+      <i class="bi bi-arrow-down-circle me-2"></i>Schedule Withdrawal
+    </a>
+    {% endif %}
+  </div>
+  <div class="col-md-6">
+    <div class="card">
+      <div class="card-header"><i class="bi bi-clock-history me-2"></i>Movement History</div>
+      <div class="card-body p-0">
+        {% if movements %}
+        <div class="list-group list-group-flush">
+          {% for m in movements %}
+          <div class="list-group-item">
+            <div class="d-flex justify-content-between">
+              <span>
+                {% if m.movement_type == 'in' %}<span class="text-success">▲ IN</span>
+                {% elif m.movement_type == 'out' %}<span class="text-danger">▼ OUT</span>
+                {% else %}<span class="text-warning">⟳ ADJ</span>{% endif %}
+                <span class="ms-2 fw-semibold">{{ m.bags_moved }} bags</span>
+              </span>
+              <span class="text-muted" style="font-size:.8rem;">{{ m.timestamp|date:"d M Y, H:i" }}</span>
+            </div>
+            {% if m.reference %}<div class="text-muted" style="font-size:.78rem;">Ref: {{ m.reference }}</div>{% endif %}
+          </div>
+          {% endfor %}
+        </div>
+        {% else %}
+          <div class="text-center py-4 text-muted">No movement history yet.</div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Verify Receipt | DCWMS</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <style>body{font-family:'Inter',sans-serif;background:#f4f6f9;}</style>
+</head>
+<body>
+<div class="container py-5">
+  <div class="mx-auto" style="max-width:560px;">
+    <div class="text-center mb-4">
+      <div style="font-size:2.5rem;">🛡️</div>
+      <h4 style="font-family:'Nunito',sans-serif;font-weight:800;">Verify Warehouse Receipt</h4>
+      <p class="text-muted" style="font-size:.9rem;">Enter a receipt code to check its authenticity and details.</p>
+    </div>
+
+    <div class="card mb-4">
+      <div class="card-body">
+        <form method="get">
+          <div class="input-group">
+            <input type="text" name="code" class="form-control" placeholder="e.g. RC-A1B2C3D4"
+              value="{{ code }}" style="border-radius:8px 0 0 8px;font-size:.95rem;font-weight:600;" required>
+            <button type="submit" class="btn" style="background:#1e7e34;color:#fff;border-radius:0 8px 8px 0;font-weight:700;">
+              Verify
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    {% if result %}
+      {% if result.found and result.valid %}
+        <div class="card border-success">
+          <div class="card-body">
+            <div class="text-center mb-3">
+              <div style="font-size:2rem;">✅</div>
+              <h5 style="color:#1e7e34;font-weight:700;">Receipt is Valid</h5>
+              <code style="background:#d4edda;padding:.3rem .8rem;border-radius:6px;">{{ result.receipt.receipt_code }}</code>
+            </div>
+            <div style="font-size:.88rem;">
+              <div class="d-flex justify-content-between py-2 border-bottom"><span class="text-muted">Farmer</span><span class="fw-semibold">{{ result.receipt.farmer.get_full_name }}</span></div>
+              <div class="d-flex justify-content-between py-2 border-bottom"><span class="text-muted">Warehouse</span><span class="fw-semibold">{{ result.receipt.warehouse.name }}</span></div>
+              <div class="d-flex justify-content-between py-2 border-bottom"><span class="text-muted">Location</span><span class="fw-semibold">{{ result.receipt.warehouse.county }}</span></div>
+              <div class="d-flex justify-content-between py-2 border-bottom"><span class="text-muted">Cereal</span><span class="fw-semibold text-capitalize">{{ result.receipt.cereal_type }}</span></div>
+              <div class="d-flex justify-content-between py-2 border-bottom"><span class="text-muted">Quantity</span><span class="fw-semibold">{{ result.receipt.quantity_bags }} bags ({{ result.receipt.quantity_mt }} MT)</span></div>
+              <div class="d-flex justify-content-between py-2 border-bottom"><span class="text-muted">Storage Period</span><span class="fw-semibold">{{ result.receipt.storage_start_date|date:"d M Y" }} – {{ result.receipt.storage_end_date|date:"d M Y" }}</span></div>
+              <div class="d-flex justify-content-between py-2"><span class="text-muted">Issued</span><span class="fw-semibold">{{ result.receipt.issued_at|date:"d M Y, H:i" }}</span></div>
+            </div>
+          </div>
+        </div>
+      {% elif result.found and not result.valid %}
+        <div class="alert alert-warning"><strong>⚠ Receipt Voided:</strong> This receipt has been voided. Reason: {{ result.receipt.void_reason|default:"Not specified" }}</div>
+      {% else %}
+        <div class="alert alert-danger"><strong>❌ Receipt Not Found:</strong> No receipt found with code "{{ code }}". Please check and try again.</div>
+      {% endif %}
+    {% endif %}
+
+    <div class="text-center mt-3">
+      <a href="{% url 'accounts:login' %}" style="font-size:.85rem;color:#1e7e34;">← Back to DCWMS</a>
+    </div>
+  </div>
+</div>
+</body>
+</html>

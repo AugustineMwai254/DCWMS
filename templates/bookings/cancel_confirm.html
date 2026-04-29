@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+{% block title %}Cancel Booking{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+  <div class="card">
+    <div class="card-header bg-danger text-white">
+      <h4 class="mb-0">Cancel Booking</h4>
+    </div>
+    <div class="card-body">
+      <p>Are you sure you want to cancel booking <strong>{{ booking.booking_ref_human }}</strong>?</p>
+      <p><strong>Warehouse:</strong> {{ booking.warehouse.name }}</p>
+      <p><strong>Quantity:</strong> {{ booking.quantity_bags }} bags ({{ booking.quantity_mt }} MT)</p>
+      <p><strong>Total Fee:</strong> KES {{ booking.total_fee_kes }}</p>
+      <p class="text-warning">This action cannot be undone once confirmed.</p>
+
+      <form method="post" class="d-inline">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">Yes, cancel booking</button>
+      </form>
+      <a href="{% url 'bookings:detail' pk=booking.pk %}" class="btn btn-secondary">No, go back</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

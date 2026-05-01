@@ -63,3 +63,4 @@ INFO 2026-04-29 18:23:11,740 basehttp 36024 4140 "GET /receipts/38/qr/ HTTP/1.1"
 INFO 2026-04-29 18:29:27,315 basehttp 36024 24696 "GET /accounts/logout/ HTTP/1.1" 302 0
 INFO 2026-04-29 18:29:27,333 basehttp 36024 24696 "GET /accounts/login/ HTTP/1.1" 200 4854
 INFO 2026-04-29 22:46:10,671 autoreload 26352 27444 Watching for file changes with StatReloader
+INFO 2026-05-01 12:17:43,058 autoreload 9768 7356 Watching for file changes with StatReloader

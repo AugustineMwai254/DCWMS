@@ -132,3 +132,9 @@ INFO 2026-05-01 12:25:09,247 basehttp 9768 14848 "POST /payments/check-status/5a
 INFO 2026-05-01 12:25:18,168 basehttp 9768 14848 "POST /payments/check-status/5af005cb-ff80-4bb6-bc9f-1ce0c3371354/ HTTP/1.1" 200 277
 INFO 2026-05-01 12:25:28,120 basehttp 9768 14848 "POST /payments/check-status/5af005cb-ff80-4bb6-bc9f-1ce0c3371354/ HTTP/1.1" 200 277
 INFO 2026-05-01 12:25:44,462 basehttp 9768 14848 "POST /payments/check-status/5af005cb-ff80-4bb6-bc9f-1ce0c3371354/ HTTP/1.1" 200 277
+INFO 2026-05-01 12:26:48,008 basehttp 9768 14848 "POST /payments/check-status/5af005cb-ff80-4bb6-bc9f-1ce0c3371354/ HTTP/1.1" 200 391
+INFO 2026-05-01 12:27:47,826 basehttp 9768 14848 "POST /payments/check-status/5af005cb-ff80-4bb6-bc9f-1ce0c3371354/ HTTP/1.1" 200 166
+INFO 2026-05-01 12:28:42,523 basehttp 9768 14848 "POST /payments/check-status/5af005cb-ff80-4bb6-bc9f-1ce0c3371354/ HTTP/1.1" 200 65
+INFO 2026-05-01 12:28:45,570 basehttp 9768 14848 "GET /payments/status/5af005cb-ff80-4bb6-bc9f-1ce0c3371354/ HTTP/1.1" 302 0
+INFO 2026-05-01 12:28:45,605 basehttp 9768 14848 "GET /receipts/39/ HTTP/1.1" 200 17117
+INFO 2026-05-01 12:28:45,705 basehttp 9768 14848 "GET /receipts/39/qr/ HTTP/1.1" 200 1666
